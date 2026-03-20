@@ -1,0 +1,13 @@
+# Generated data (contains your personal session data)
+data.json
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code project files
+.claude/

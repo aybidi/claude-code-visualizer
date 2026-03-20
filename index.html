@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Claude Code Story</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a1b26;
+      --bg-dark: #16161e;
+      --bg-darker: #0f0f14;
+      --bg-current: #292e42;
+      --text: #c0caf5;
+      --text-muted: #565f89;
+      --text-light: #565f89;
+      --border: #292e42;
+      --accent: #e8855a;
+      --accent-light: #f0a878;
+      --accent-glow: rgba(232,133,90,0.15);
+      --cyan: #7dcfff;
+      --green: #9ece6a;
+      --orange: #e0af68;
+      --pink: #f7768e;
+      --purple: #bb9af7;
+      --red: #f7768e;
+      --yellow: #e0af68;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ─── Loading ─────────────────────────────────────────── */
+    .loading-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg-darker);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); font-size: 1.1rem; font-weight: 300;
+      transition: opacity 0.6s, visibility 0.6s;
+    }
+    body.loaded .loading-screen { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* ─── Hero ────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--bg-darker) 0%, #1a1b26 50%, #1e2030 100%);
+      color: white;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 40%, rgba(232,133,90,0.08) 0%, transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(125,207,255,0.05) 0%, transparent 50%);
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero-label {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.03em; margin-bottom: 0.75rem;
+    }
+    .hero-subtitle {
+      font-size: 0.95rem; color: rgba(192,202,245,0.5);
+      font-weight: 300; margin-bottom: 3rem;
+    }
+    .hero-stats {
+      display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card { text-align: center; }
+    .stat-value {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700; font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, #e8855a, #f0a878, #e0af68);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 0.8rem; font-weight: 500;
+      color: rgba(255,255,255,0.45); text-transform: uppercase;
+      letter-spacing: 0.12em; margin-top: 0.25rem;
+    }
+    .hero-meta {
+      display: flex; gap: 1.5rem; align-items: center;
+      font-size: 0.85rem; color: rgba(255,255,255,0.4);
+      margin-bottom: 4rem;
+    }
+    .hero-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,0.25); }
+    .scroll-hint {
+      position: absolute; bottom: 2.5rem;
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+    /* ─── Section Intros ──────────────────────────────────── */
+    .section-intro {
+      min-height: 40vh; padding: 6rem 2rem;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .section-intro.visible { opacity: 1; transform: translateY(0); }
+    .section-num {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.2em;
+    }
+    .section-intro h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700; margin: 0.5rem 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .section-intro p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* ─── Scrollytelling ──────────────────────────────────── */
+    .scroll-section {
+      display: flex; position: relative;
+    }
+    .scroll-text {
+      flex: 0 0 36%; padding: 0 2rem 0 3rem;
+      z-index: 2;
+    }
+    .scroll-graphic {
+      flex: 1; position: sticky;
+      top: 0; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem 3rem 2rem 1rem;
+    }
+    .graphic-container {
+      width: 100%; height: 80%;
+      position: relative;
+    }
+    .graphic-container svg { display: block; }
+
+    .step {
+      min-height: 70vh;
+      display: flex; align-items: center;
+      padding: 2rem 0;
+      opacity: 0.1;
+      transition: opacity 0.6s ease;
+    }
+    .step:first-child { padding-top: 35vh; }
+    .step:last-child { padding-bottom: 50vh; }
+    .step.active { opacity: 1; }
+    .step p {
+      font-size: 0.95rem; line-height: 1.85;
+      color: var(--text); max-width: 340px;
+    }
+    .hl {
+      color: var(--accent); font-weight: 600;
+    }
+    .hl-pink { color: var(--pink); font-weight: 600; }
+    .hl-green { color: var(--green); font-weight: 600; }
+    .hl-amber { color: var(--orange); font-weight: 600; }
+
+    /* ─── Tooltip ─────────────────────────────────────────── */
+    .tooltip {
+      position: fixed; z-index: 1000;
+      background: var(--bg-darker); color: var(--text);
+      border: 1px solid var(--bg-current);
+      padding: 0.5rem 0.75rem; border-radius: 8px;
+      font-size: 0.78rem; line-height: 1.5;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.12s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      max-width: 220px;
+    }
+    .tooltip.visible { opacity: 1; }
+
+    /* ─── Outro ───────────────────────────────────────────── */
+    .outro {
+      min-height: 80vh;
+      background: linear-gradient(160deg, var(--bg-darker) 0%, #1a1b26 100%);
+      color: white; padding: 6rem 2rem;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .outro h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700; margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .outro-subtitle {
+      color: rgba(192,202,245,0.5); font-size: 0.9rem;
+      margin-bottom: 3rem; max-width: 480px;
+    }
+    .outro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem; max-width: 700px; width: 100%;
+      margin-bottom: 3rem;
+    }
+    .outro-card {
+      background: rgba(41,46,66,0.6);
+      border: 1px solid rgba(86,95,137,0.3);
+      border-radius: 12px; padding: 1.5rem;
+    }
+    .outro-card .val {
+      font-size: 1.6rem; font-weight: 700;
+      color: var(--cyan);
+    }
+    .outro-card .lbl {
+      font-size: 0.78rem; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+    .outro-note {
+      font-size: 0.8rem; color: rgba(255,255,255,0.25);
+      margin-top: 2rem;
+    }
+
+    /* ─── Chart Styles ────────────────────────────────────── */
+    .axis line, .axis path { stroke: var(--bg-current); }
+    .axis text { fill: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .grid line { stroke: var(--bg-current); stroke-opacity: 0.4; stroke-dasharray: 2,3; }
+    .grid path { display: none; }
+    .chart-title {
+      font-size: 13px; font-weight: 600; fill: var(--text);
+    }
+    .annotation-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3,3; }
+    .annotation-text { font-size: 11px; fill: var(--cyan); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-label { font-size: 12px; fill: var(--text); font-weight: 500; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-value { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .heatmap-label { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+
+    /* ─── Responsive ──────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .scroll-section { flex-direction: column-reverse; }
+      .scroll-text { flex: none; padding: 0 1.5rem; }
+      .scroll-graphic {
+        position: relative; height: 60vh;
+        padding: 1.5rem;
+      }
+      .step { min-height: 50vh; }
+      .step:first-child { padding-top: 2rem; }
+      .hero-stats { gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading -->
+  <div class="loading-screen">Loading your data...</div>
+
+  <!-- Tooltip -->
+  <div class="tooltip" id="tooltip"></div>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero">
+    <div class="hero-label">Claude Code Analytics</div>
+    <h1>Your Claude Code Story</h1>
+    <p class="hero-subtitle" id="hero-subtitle"></p>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-sessions">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-messages">0</div>
+        <div class="stat-label">Messages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-tokens">0</div>
+        <div class="stat-label">Tokens</div>
+      </div>
+    </div>
+    <div class="hero-meta" id="hero-meta"></div>
+    <div class="scroll-hint">Scroll to explore</div>
+  </section>
+
+  <!-- ═══ Section 1: Timeline ═══ -->
+  <div class="section-intro">
+    <span class="section-num">01</span>
+    <h2>The Timeline</h2>
+    <p>Your activity day by day</p>
+  </div>
+  <section class="scroll-section" id="sec-timeline">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="tl-step-0"></div>
+      <div class="step" data-step="1" id="tl-step-1"></div>
+      <div class="step" data-step="2" id="tl-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-timeline"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 2: Projects ═══ -->
+  <div class="section-intro">
+    <span class="section-num">02</span>
+    <h2>Your Projects</h2>
+    <p>What you've been building</p>
+  </div>
+  <section class="scroll-section" id="sec-projects">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="pj-step-0"></div>
+      <div class="step" data-step="1" id="pj-step-1"></div>
+      <div class="step" data-step="2" id="pj-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-projects"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 3: Tools ═══ -->
+  <div class="section-intro">
+    <span class="section-num">03</span>
+    <h2>The Tool Belt</h2>
+    <p>How Claude helped you code</p>
+  </div>
+  <section class="scroll-section" id="sec-tools">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="tl2-step-0"></div>
+      <div class="step" data-step="1" id="tl2-step-1"></div>
+      <div class="step" data-step="2" id="tl2-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-tools"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 4: Rhythm ═══ -->
+  <div class="section-intro">
+    <span class="section-num">04</span>
+    <h2>Your Rhythm</h2>
+    <p>When the magic happens</p>
+  </div>
+  <section class="scroll-section" id="sec-rhythm">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="rh-step-0"></div>
+      <div class="step" data-step="1" id="rh-step-1"></div>
+      <div class="step" data-step="2" id="rh-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-rhythm"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 5: Goals & Intentions ═══ -->
+  <div class="section-intro">
+    <span class="section-num">05</span>
+    <h2>Your Intentions</h2>
+    <p>What you were trying to accomplish</p>
+  </div>
+  <section class="scroll-section" id="sec-goals">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="gl-step-0"></div>
+      <div class="step" data-step="1" id="gl-step-1"></div>
+      <div class="step" data-step="2" id="gl-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-goals"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 6: Outcomes & Quality ═══ -->
+  <div class="section-intro">
+    <span class="section-num">06</span>
+    <h2>How It Went</h2>
+    <p>Outcomes, friction, and what worked</p>
+  </div>
+  <section class="scroll-section" id="sec-outcomes">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="oc-step-0"></div>
+      <div class="step" data-step="1" id="oc-step-1"></div>
+      <div class="step" data-step="2" id="oc-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-outcomes"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Outro ═══ -->
+  <section class="outro" id="outro"></section>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+  /* ═══════════════════════════════════════════════════════════
+     Constants & Helpers
+     ═══════════════════════════════════════════════════════════ */
+  const COLORS = ['#e8855a','#7dcfff','#9ece6a','#e0af68','#bb9af7','#f7768e','#73daca','#ff9e64','#2ac3de','#b4f9f8'];
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  }
+  function fmtNum(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + 'K';
+    return n.toLocaleString();
+  }
+  function fmtFull(n) { return n.toLocaleString(); }
+
+  const tooltip = document.getElementById('tooltip');
+  function showTip(html, evt) {
+    tooltip.innerHTML = html;
+    tooltip.classList.add('visible');
+    tooltip.style.left = (evt.clientX + 14) + 'px';
+    tooltip.style.top = (evt.clientY - 14) + 'px';
+  }
+  function hideTip() { tooltip.classList.remove('visible'); }
+
+  function animateValue(el, target, duration = 1800, formatter = fmtFull) {
+    const start = performance.now();
+    (function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = formatter(Math.round(target * ease));
+      if (t < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Initialization
+     ═══════════════════════════════════════════════════════════ */
+  fetch('data.json')
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(data => {
+      document.body.classList.add('loaded');
+      initHero(data);
+      populateNarrative(data);
+      populateOutro(data);
+      const updaters = {
+        timeline: createTimeline(data),
+        projects: createProjects(data),
+        tools:    createTools(data),
+        rhythm:   createRhythm(data),
+        goals:    createGoals(data),
+        outcomes: createOutcomes(data),
+      };
+      setupScroll(updaters);
+      observeIntros();
+    })
+    .catch(err => {
+      document.querySelector('.loading-screen').innerHTML =
+        '<div style="text-align:center;max-width:420px"><p style="margin-bottom:1rem">Could not load data.json</p>' +
+        '<p style="opacity:0.5;font-size:0.85rem">Run: <code>python3 process_data.py && python3 -m http.server</code></p></div>';
+    });
+
+  /* ─── Hero ────────────────────────────────────────────── */
+  function initHero(data) {
+    const o = data.overview;
+    document.getElementById('hero-subtitle').textContent =
+      `${o.daySpan} days of AI-assisted coding`;
+
+    setTimeout(() => {
+      animateValue(document.getElementById('stat-sessions'), o.totalSessions, 1200);
+      animateValue(document.getElementById('stat-messages'), o.totalMessages, 1600);
+      animateValue(document.getElementById('stat-tokens'), o.totalTokens, 2000, fmtNum);
+    }, 400);
+
+    const opus = data.models.find(m => m.name.includes('opus'));
+    const sonnet = data.models.find(m => m.name.includes('sonnet'));
+    const meta = document.getElementById('hero-meta');
+    meta.innerHTML = `
+      <span>${fmtDate(o.firstDate)} – ${fmtDate(o.lastDate)}, 2026</span>
+      <span class="dot"></span>
+      <span>${data.projects.length} projects</span>
+      <span class="dot"></span>
+      <span>${opus ? fmtFull(opus.count) : '—'} Opus + ${sonnet ? fmtFull(sonnet.count) : '—'} Sonnet responses</span>
+    `;
+  }
+
+  /* ─── Narrative Text ──────────────────────────────────── */
+  function populateNarrative(data) {
+    const tl = data.timeline;
+    const busiest = tl.reduce((a, b) => a.messages > b.messages ? a : b);
+    const second = tl.filter(d => d.date !== busiest.date).reduce((a, b) => a.messages > b.messages ? a : b);
+    const totalDays = tl.length;
+
+    document.getElementById('tl-step-0').innerHTML = `<p>It started on <span class="hl">${fmtDate(data.overview.firstDate)}</span>.
+      That first day, you dove in deep — <span class="hl">${fmtFull(busiest.messages)} messages</span> across
+      <span class="hl">${busiest.sessions} sessions</span>. Something clicked.</p>`;
+    document.getElementById('tl-step-1').innerHTML = `<p>The next day was nearly as intense:
+      <span class="hl">${fmtFull(second.messages)} messages</span>.
+      In just 48 hours, you'd exchanged over <span class="hl">1,000 messages</span> with Claude.</p>`;
+    document.getElementById('tl-step-2').innerHTML = `<p>After that opening sprint, a rhythm emerged.
+      Focused bursts of activity across <span class="hl">${totalDays} active days</span>,
+      with quiet stretches in between.</p>`;
+
+    const pj = data.projects;
+    const top = pj[0];
+    document.getElementById('pj-step-0').innerHTML = `<p>You explored
+      <span class="hl">${pj.length} distinct projects</span> — from flashcard apps to LLM inference engines.
+      Each bubble represents one project, sized by how much you and Claude talked about it.</p>`;
+    document.getElementById('pj-step-1').innerHTML = `<p><span class="hl">${top.name}</span> leads the pack
+      with <span class="hl">${fmtFull(top.messages)} messages</span> across ${top.sessions} sessions.
+      This was your deepest collaboration.</p>`;
+    document.getElementById('pj-step-2').innerHTML = `<p>${pj.length > 3
+      ? `<span class="hl-pink">${pj[1].name}</span>, <span class="hl-green">${pj[2].name}</span>, and <span class="hl-amber">${pj[3].name}</span> form a tight cluster around 250 messages each — showing how you spread your curiosity across multiple domains.`
+      : 'Your projects span a diverse range of domains.'}</p>`;
+
+    const tools = data.tools;
+    const totalTools = tools.reduce((s, t) => s + t.count, 0);
+    document.getElementById('tl2-step-0').innerHTML = `<p>Behind every conversation, Claude used tools —
+      <span class="hl">${fmtFull(totalTools)} invocations</span> across
+      <span class="hl">${tools.length} different tools</span>.</p>`;
+    document.getElementById('tl2-step-1').innerHTML = `<p><span class="hl">${tools[0].name}</span> dominated
+      with <span class="hl">${tools[0].count} uses</span>. Claude's first instinct is always to
+      understand your code before changing it.</p>`;
+    document.getElementById('tl2-step-2').innerHTML = `<p><span class="hl-pink">${tools[1].name}</span>
+      comes next at ${tools[1].count}, followed by the writing tools:
+      <span class="hl-green">${tools[2].name}</span> and <span class="hl-amber">${tools[3].name}</span>.
+      Read → Think → Write — a deliberate workflow.</p>`;
+
+    const weekendPct = Math.round((data.weekly[5].count + data.weekly[6].count) / data.overview.totalMessages * 100);
+    const peakHour = data.hourly.reduce((a, b) => a.count > b.count ? a : b);
+    const peakDay = data.weekly.reduce((a, b) => a.count > b.count ? a : b);
+    document.getElementById('rh-step-0').innerHTML = `<p>When do you code with Claude? This heatmap maps
+      your activity by <span class="hl">day of week</span> and <span class="hl">hour</span> (UTC).</p>`;
+    document.getElementById('rh-step-1').innerHTML = `<p>You're a <span class="hl">weekend warrior</span> —
+      Saturday and Sunday account for <span class="hl">${weekendPct}%</span> of all messages.</p>`;
+    document.getElementById('rh-step-2').innerHTML = `<p>Peak hour: <span class="hl">${peakHour.hour}:00 UTC</span>
+      with ${fmtFull(peakHour.count)} messages. <span class="hl">${DAYS[peakDay.day]}</span> is your
+      most active day overall.</p>`;
+
+    // ── Goals section ──
+    const ins = data.insights;
+    if (ins && ins.goals && ins.goals.length) {
+      const topGoal = ins.goals[0];
+      const fmtGoalName = n => n.replace(/_/g, ' ');
+      document.getElementById('gl-step-0').innerHTML = `<p>Across ${ins.totalFacets} analyzed sessions, Claude identified
+        <span class="hl">${ins.goals.length} distinct goal types</span> in your usage.
+        Each bubble shows what you were trying to accomplish.</p>`;
+      document.getElementById('gl-step-1').innerHTML = `<p><span class="hl">${fmtGoalName(topGoal.name)}</span> was
+        your top goal with <span class="hl">${topGoal.count} sessions</span>.
+        ${ins.goals.length > 2 ? `<span class="hl-pink">${fmtGoalName(ins.goals[1].name)}</span> and
+        <span class="hl-green">${fmtGoalName(ins.goals[2].name)}</span> round out the top three.` : ''}</p>`;
+      const stTop = ins.sessionTypes[0];
+      document.getElementById('gl-step-2').innerHTML = `<p>Your most common session type is
+        <span class="hl">${fmtGoalName(stTop.name)}</span> (${stTop.count} sessions).
+        You use Claude as a <span class="hl-amber">learning &amp; exploration</span> tool
+        as much as a coding assistant.</p>`;
+    }
+
+    // ── Outcomes section ──
+    if (ins && ins.outcomes && ins.outcomes.length) {
+      const achieved = ins.outcomes.filter(o => o.name === 'fully_achieved' || o.name === 'mostly_achieved');
+      const achievedPct = Math.round(achieved.reduce((s,o) => s+o.count, 0) / ins.totalFacets * 100);
+      document.getElementById('oc-step-0').innerHTML = `<p>How did your sessions go?
+        <span class="hl">${achievedPct}% of sessions</span> were fully or mostly achieved.
+        The donut shows the outcome breakdown.</p>`;
+      const topFriction = ins.friction.length > 0 ? ins.friction[0] : null;
+      document.getElementById('oc-step-1').innerHTML = `<p>${topFriction
+        ? `The most common friction point was <span class="hl-pink">${topFriction.name.replace(/_/g,' ')}</span> (${topFriction.count} times). ${ins.friction.length > 1 ? `<span class="hl-amber">${ins.friction[1].name.replace(/_/g,' ')}</span> hit ${ins.friction[1].count} times.` : ''}`
+        : 'Remarkably few friction points.'}</p>`;
+      const topSuccess = ins.successFactors.length > 0 ? ins.successFactors[0] : null;
+      document.getElementById('oc-step-2').innerHTML = `<p>What made sessions succeed?
+        <span class="hl-green">${topSuccess ? topSuccess.name.replace(/_/g,' ') : 'good output'}</span>
+        was the #1 success factor${topSuccess ? ` (${topSuccess.count} sessions)` : ''}.
+        Claude was rated <span class="hl">very helpful</span> or <span class="hl">essential</span> in
+        ${ins.helpfulness.filter(h => h.name === 'very_helpful' || h.name === 'essential').reduce((s,h) => s+h.count, 0)} of ${ins.totalFacets} sessions.</p>`;
+    }
+  }
+
+  /* ─── Outro ───────────────────────────────────────────── */
+  function populateOutro(data) {
+    const o = data.overview;
+    const ss = data.sessionStats;
+    const cacheTotal = o.totalCacheRead + o.totalCacheWrite;
+    const cacheHitPct = cacheTotal > 0 ? Math.round(o.totalCacheRead / cacheTotal * 100) : 0;
+
+    document.getElementById('outro').innerHTML = `
+      <h2>The Full Picture</h2>
+      <p class="outro-subtitle">A snapshot of ${o.daySpan} days of building, exploring, and learning with AI</p>
+      <div class="outro-grid">
+        <div class="outro-card"><div class="val">${fmtNum(o.totalOutputTokens)}</div><div class="lbl">Tokens Generated</div></div>
+        <div class="outro-card"><div class="val">${cacheHitPct}%</div><div class="lbl">Cache Hit Rate</div></div>
+        <div class="outro-card"><div class="val">${ss.maxMessages}</div><div class="lbl">Longest Session (msgs)</div></div>
+        <div class="outro-card"><div class="val">${Math.round(ss.avgMessages)}</div><div class="lbl">Avg Messages / Session</div></div>
+        <div class="outro-card"><div class="val">+${fmtNum(data.insights.linesAdded)}</div><div class="lbl">Lines of Code Added</div></div>
+        <div class="outro-card"><div class="val">${data.insights.languages.length}</div><div class="lbl">Languages Used</div></div>
+      </div>
+      <p class="outro-note">Generated with Claude Code</p>
+    `;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Scrollytelling Setup
+     ═══════════════════════════════════════════════════════════ */
+  function setupScroll(updaters) {
+    document.querySelectorAll('.scroll-section').forEach(section => {
+      const key = section.id.replace('sec-', '');
+      const steps = section.querySelectorAll('.step');
+      const update = updaters[key];
+      if (!update) return;
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            steps.forEach(s => s.classList.remove('active'));
+            entry.target.classList.add('active');
+            update(parseInt(entry.target.dataset.step));
+          }
+        });
+      }, { threshold: 0.45, rootMargin: '-15% 0px -15% 0px' });
+
+      steps.forEach(step => observer.observe(step));
+    });
+  }
+
+  function observeIntros() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.section-intro').forEach(el => obs.observe(el));
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Visualizations
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ─── 1. Timeline (Area Chart) ────────────────────────── */
+  function createTimeline(data) {
+    const container = document.getElementById('viz-timeline');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 40, r: 30, b: 50, l: 55 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const defs = svg.append('defs');
+    const grad = defs.append('linearGradient').attr('id', 'area-grad')
+      .attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 1);
+    grad.append('stop').attr('offset', '0%').attr('stop-color', '#e8855a').attr('stop-opacity', 0.4);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', '#e8855a').attr('stop-opacity', 0.02);
+
+    const clip = defs.append('clipPath').attr('id', 'tl-clip')
+      .append('rect').attr('width', 0).attr('height', H);
+
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`)
+      .attr('clip-path', 'url(#tl-clip)');
+
+    const parseDate = d => new Date(d.date + 'T12:00:00Z');
+    const x = d3.scaleTime()
+      .domain(d3.extent(data.timeline, parseDate)).range([0, w]);
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data.timeline, d => d.messages) * 1.1]).nice().range([h, 0]);
+
+    // Grid
+    g.append('g').attr('class', 'grid').attr('transform', `translate(0,${h})`)
+      .call(d3.axisBottom(x).ticks(5).tickSize(-h).tickFormat(''));
+    g.append('g').attr('class', 'grid')
+      .call(d3.axisLeft(y).ticks(5).tickSize(-w).tickFormat(''));
+
+    // Axes
+    svg.append('g').attr('class', 'axis')
+      .attr('transform', `translate(${m.l},${m.t + h})`)
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.utcFormat('%b %d')));
+    svg.append('g').attr('class', 'axis')
+      .attr('transform', `translate(${m.l},${m.t})`)
+      .call(d3.axisLeft(y).ticks(5));
+
+    // Area
+    const area = d3.area()
+      .x(d => x(parseDate(d))).y0(h).y1(d => y(d.messages))
+      .curve(d3.curveMonotoneX);
+    g.append('path').datum(data.timeline)
+      .attr('d', area).attr('fill', 'url(#area-grad)');
+
+    // Line
+    const line = d3.line()
+      .x(d => x(parseDate(d))).y(d => y(d.messages))
+      .curve(d3.curveMonotoneX);
+    g.append('path').datum(data.timeline)
+      .attr('d', line).attr('fill', 'none')
+      .attr('stroke', '#e8855a').attr('stroke-width', 2.5);
+
+    // Dots
+    const dots = g.selectAll('.dot').data(data.timeline).join('circle')
+      .attr('class', 'dot')
+      .attr('cx', d => x(parseDate(d))).attr('cy', d => y(d.messages))
+      .attr('r', 4).attr('fill', '#e8855a').attr('stroke', '#1a1b26').attr('stroke-width', 2)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.date}</strong><br>${d.messages} messages<br>${d.sessions} sessions`, evt))
+      .on('mouseleave', hideTip);
+
+    // Busiest annotation
+    const busiest = data.timeline.reduce((a, b) => a.messages > b.messages ? a : b);
+    const annG = g.append('g').attr('class', 'annotation').attr('opacity', 0);
+    annG.append('line').attr('class', 'annotation-line')
+      .attr('x1', x(parseDate(busiest))).attr('x2', x(parseDate(busiest)))
+      .attr('y1', y(busiest.messages) - 8).attr('y2', y(busiest.messages) - 40);
+    annG.append('text').attr('class', 'annotation-text')
+      .attr('x', x(parseDate(busiest))).attr('y', y(busiest.messages) - 46)
+      .attr('text-anchor', 'middle')
+      .text(`Busiest: ${busiest.messages} msgs`);
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        clip.transition().duration(1200).ease(d3.easeCubicOut)
+          .attr('width', W);
+        annG.transition().duration(400).attr('opacity', 0);
+        dots.transition().duration(400).attr('r', 4).attr('fill', '#e8855a');
+      } else if (step === 1) {
+        clip.attr('width', W);
+        const busiestTwo = [busiest.date, data.timeline.filter(d => d.date !== busiest.date)
+          .reduce((a,b) => a.messages > b.messages ? a : b).date];
+        dots.transition().duration(600)
+          .attr('r', d => busiestTwo.includes(d.date) ? 7 : 4)
+          .attr('fill', d => busiestTwo.includes(d.date) ? '#f7768e' : '#e8855a');
+        annG.transition().delay(300).duration(500).attr('opacity', 1);
+      } else if (step === 2) {
+        dots.transition().duration(600).attr('r', 4).attr('fill', '#e8855a');
+        annG.transition().duration(400).attr('opacity', 0);
+      }
+    };
+  }
+
+  /* ─── 2. Projects (Circle Packing) ────────────────────── */
+  function createProjects(data) {
+    const container = document.getElementById('viz-projects');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const size = Math.min(W, H);
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const root = d3.hierarchy({ children: data.projects }).sum(d => d.messages);
+    d3.pack().size([size - 20, size - 20]).padding(6)(root);
+
+    const offsetX = (W - size) / 2 + 10;
+    const offsetY = (H - size) / 2 + 10;
+
+    const nodes = svg.selectAll('g.node')
+      .data(root.leaves()).join('g')
+      .attr('class', 'node')
+      .attr('transform', d => `translate(${d.x + offsetX},${d.y + offsetY})`)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.data.name}</strong><br>${d.data.messages} messages<br>${d.data.sessions} sessions`, evt))
+      .on('mouseleave', hideTip);
+
+    nodes.append('circle')
+      .attr('r', 0)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('opacity', 0.85)
+      .attr('stroke', '#1a1b26').attr('stroke-width', 2);
+
+    nodes.append('text')
+      .text(d => d.r > 30 ? d.data.name : '')
+      .attr('text-anchor', 'middle').attr('dy', '-0.2em')
+      .attr('fill', '#1a1b26').attr('font-weight', 600)
+      .attr('font-size', d => Math.min(d.r / 3.5, 14))
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0)
+      .attr('pointer-events', 'none');
+
+    nodes.append('text')
+      .text(d => d.r > 30 ? d.data.messages : '')
+      .attr('text-anchor', 'middle').attr('dy', '1.1em')
+      .attr('fill', 'rgba(40,42,54,0.7)').attr('font-weight', 400)
+      .attr('font-size', d => Math.min(d.r / 4.5, 11))
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0)
+      .attr('pointer-events', 'none');
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        nodes.select('circle')
+          .transition().duration(800).delay((_, i) => i * 100)
+          .ease(d3.easeElasticOut.amplitude(1).period(0.5))
+          .attr('r', d => d.r);
+        nodes.selectAll('text')
+          .transition().delay((_, i) => 600 + (nodes.data().indexOf(nodes.selectAll('text').data()[i]) || 0) * 100).duration(400)
+          .attr('opacity', 1);
+        nodes.select('circle').transition().delay(1200).duration(400).attr('opacity', 0.85);
+      } else if (step === 1) {
+        nodes.select('circle').transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 0.95 : 0.2);
+        nodes.selectAll('text').transition().duration(500)
+          .attr('opacity', (d, i, els) => {
+            const parent = els[i].parentNode;
+            const idx = Array.from(parent.parentNode.children).indexOf(parent);
+            return idx === 0 ? 1 : 0.2;
+          });
+      } else if (step === 2) {
+        nodes.select('circle').transition().duration(500).attr('opacity', 0.85);
+        nodes.selectAll('text').transition().duration(500).attr('opacity', 1);
+      }
+    };
+  }
+
+  /* ─── 3. Tools (Horizontal Bar Chart) ─────────────────── */
+  function createTools(data) {
+    const container = document.getElementById('viz-tools');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 30, r: 60, b: 40, l: 100 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const tools = data.tools.slice(0, 8);
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+
+    const y = d3.scaleBand().domain(tools.map(t => t.name)).range([0, h]).padding(0.35);
+    const x = d3.scaleLinear().domain([0, d3.max(tools, t => t.count) * 1.1]).range([0, w]);
+
+    // Grid
+    g.append('g').attr('class', 'grid')
+      .call(d3.axisBottom(x).ticks(5).tickSize(h).tickFormat(''))
+      .attr('transform', 'translate(0,0)');
+
+    // Labels
+    g.selectAll('.bar-label').data(tools).join('text')
+      .attr('class', 'bar-label')
+      .attr('x', -12).attr('y', d => y(d.name) + y.bandwidth() / 2)
+      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
+      .text(d => d.name);
+
+    // Bars
+    const bars = g.selectAll('.bar').data(tools).join('rect')
+      .attr('class', 'bar')
+      .attr('x', 0).attr('y', d => y(d.name))
+      .attr('width', 0).attr('height', y.bandwidth())
+      .attr('rx', 4)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('opacity', 0.85)
+      .on('mousemove', (evt, d) => {
+        const projs = d.topProjects.map(p => `${p[0]}: ${p[1]}`).join('<br>');
+        showTip(`<strong>${d.name}</strong>: ${d.count} uses<br><br>${projs}`, evt);
+      })
+      .on('mouseleave', hideTip);
+
+    // Values
+    const vals = g.selectAll('.bar-value').data(tools).join('text')
+      .attr('class', 'bar-value')
+      .attr('x', 0).attr('y', d => y(d.name) + y.bandwidth() / 2)
+      .attr('dominant-baseline', 'central')
+      .attr('opacity', 0)
+      .text(d => d.count);
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        bars.transition().duration(800).delay((_, i) => i * 60)
+          .ease(d3.easeCubicOut)
+          .attr('width', d => x(d.count));
+        vals.transition().duration(400).delay((_, i) => 600 + i * 60)
+          .attr('x', d => x(d.count) + 8).attr('opacity', 1);
+        bars.transition().delay(1000).duration(400).attr('opacity', 0.85);
+      } else if (step === 1) {
+        bars.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 0.95 : 0.25);
+        vals.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 1 : 0.3);
+      } else if (step === 2) {
+        bars.transition().duration(500).attr('opacity', 0.85);
+        vals.transition().duration(500).attr('opacity', 1);
+      }
+    };
+  }
+
+  /* ─── 4. Rhythm (Heatmap) ─────────────────────────────── */
+  function createRhythm(data) {
+    const container = document.getElementById('viz-rhythm');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 40, r: 20, b: 20, l: 50 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+
+    const maxCount = d3.max(data.heatmap, d => d.count);
+    const color = d3.scaleSequential()
+      .domain([0, maxCount])
+      .interpolator(t => d3.interpolateRgb('#292e42', '#e8855a')(Math.pow(t, 0.6)));
+
+    const cellW = w / 24;
+    const cellH = h / 7;
+
+    // Hour labels
+    for (let h2 = 0; h2 < 24; h2 += 3) {
+      g.append('text').attr('class', 'heatmap-label')
+        .attr('x', h2 * cellW + cellW / 2).attr('y', -10)
+        .attr('text-anchor', 'middle').text(`${h2}:00`);
+    }
+
+    // Day labels
+    DAYS.forEach((d, i) => {
+      g.append('text').attr('class', 'heatmap-label')
+        .attr('x', -10).attr('y', i * cellH + cellH / 2)
+        .attr('text-anchor', 'end').attr('dominant-baseline', 'central').text(d);
+    });
+
+    const cells = g.selectAll('.cell').data(data.heatmap).join('rect')
+      .attr('class', 'cell')
+      .attr('x', d => d.hour * cellW + 1)
+      .attr('y', d => d.day * cellH + 1)
+      .attr('width', cellW - 2).attr('height', cellH - 2)
+      .attr('rx', 3)
+      .attr('fill', '#292e42')
+      .attr('stroke', '#1a1b26').attr('stroke-width', 1)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${DAYS[d.day]} ${d.hour}:00 UTC</strong><br>${d.count} messages`, evt))
+      .on('mouseleave', hideTip);
+
+    // Weekend highlight overlay
+    const weekendOverlay = g.append('rect')
+      .attr('x', 0).attr('y', 5 * cellH)
+      .attr('width', w).attr('height', 2 * cellH)
+      .attr('fill', 'none').attr('stroke', '#f7768e')
+      .attr('stroke-width', 2).attr('rx', 4)
+      .attr('opacity', 0).attr('pointer-events', 'none');
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        cells.transition().duration(600).delay((_, i) => i * 2)
+          .attr('fill', d => color(d.count));
+        weekendOverlay.transition().duration(400).attr('opacity', 0);
+      } else if (step === 1) {
+        cells.transition().duration(500)
+          .attr('fill', d => color(d.count))
+          .attr('opacity', d => (d.day >= 5) ? 1 : 0.2);
+        weekendOverlay.transition().duration(500).attr('opacity', 1);
+      } else if (step === 2) {
+        cells.transition().duration(500)
+          .attr('fill', d => color(d.count)).attr('opacity', 1);
+        weekendOverlay.transition().duration(400).attr('opacity', 0);
+      }
+    };
+  }
+
+  /* ─── 5. Goals (Horizontal Bar Chart) ─────────────────── */
+  function createGoals(data) {
+    const ins = data.insights;
+    if (!ins || !ins.goals || !ins.goals.length) return () => {};
+
+    const container = document.getElementById('viz-goals');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 30, r: 50, b: 40, l: 160 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const goals = ins.goals.slice(0, 10);
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+
+    const y = d3.scaleBand().domain(goals.map(t => t.name)).range([0, h]).padding(0.3);
+    const x = d3.scaleLinear().domain([0, d3.max(goals, t => t.count) * 1.15]).range([0, w]);
+
+    g.append('g').attr('class', 'grid')
+      .call(d3.axisBottom(x).ticks(5).tickSize(h).tickFormat(''));
+
+    const fmtName = n => n.replace(/_/g, ' ');
+
+    g.selectAll('.bar-label').data(goals).join('text')
+      .attr('class', 'bar-label')
+      .attr('x', -12).attr('y', d => y(d.name) + y.bandwidth() / 2)
+      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
+      .attr('font-size', '11px')
+      .text(d => fmtName(d.name));
+
+    const bars = g.selectAll('.bar').data(goals).join('rect')
+      .attr('class', 'bar')
+      .attr('x', 0).attr('y', d => y(d.name))
+      .attr('width', 0).attr('height', y.bandwidth())
+      .attr('rx', 4)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('opacity', 0.85);
+
+    const vals = g.selectAll('.bar-value').data(goals).join('text')
+      .attr('class', 'bar-value')
+      .attr('x', 0).attr('y', d => y(d.name) + y.bandwidth() / 2)
+      .attr('dominant-baseline', 'central')
+      .attr('opacity', 0)
+      .text(d => d.count);
+
+    // Session type badges (shown in step 2)
+    const stG = svg.append('g').attr('transform', `translate(${m.l},${m.t})`).attr('opacity', 0);
+    const sessionTypes = ins.sessionTypes;
+    const stY = d3.scaleBand().domain(sessionTypes.map(s => s.name)).range([0, h]).padding(0.3);
+    const stX = d3.scaleLinear().domain([0, d3.max(sessionTypes, s => s.count) * 1.15]).range([0, w]);
+
+    stG.selectAll('.st-label').data(sessionTypes).join('text')
+      .attr('class', 'bar-label')
+      .attr('x', -12).attr('y', d => stY(d.name) + stY.bandwidth() / 2)
+      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
+      .attr('font-size', '11px')
+      .text(d => fmtName(d.name));
+
+    stG.selectAll('.st-bar').data(sessionTypes).join('rect')
+      .attr('x', 0).attr('y', d => stY(d.name))
+      .attr('width', d => stX(d.count)).attr('height', stY.bandwidth())
+      .attr('rx', 4)
+      .attr('fill', (_, i) => ['#7dcfff','#9ece6a','#e0af68','#f7768e','#e8855a'][i % 5])
+      .attr('opacity', 0.85);
+
+    stG.selectAll('.st-val').data(sessionTypes).join('text')
+      .attr('class', 'bar-value')
+      .attr('x', d => stX(d.count) + 8).attr('y', d => stY(d.name) + stY.bandwidth() / 2)
+      .attr('dominant-baseline', 'central')
+      .text(d => d.count);
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        g.attr('opacity', 1);
+        stG.transition().duration(400).attr('opacity', 0);
+        bars.transition().duration(800).delay((_, i) => i * 50)
+          .ease(d3.easeCubicOut).attr('width', d => x(d.count));
+        vals.transition().duration(400).delay((_, i) => 500 + i * 50)
+          .attr('x', d => x(d.count) + 8).attr('opacity', 1);
+        bars.transition().delay(900).duration(400).attr('opacity', 0.85);
+      } else if (step === 1) {
+        g.attr('opacity', 1);
+        stG.transition().duration(400).attr('opacity', 0);
+        bars.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 0.95 : 0.25);
+        vals.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 1 : 0.3);
+      } else if (step === 2) {
+        g.transition().duration(400).attr('opacity', 0);
+        stG.transition().delay(300).duration(600).attr('opacity', 1);
+      }
+    };
+  }
+
+  /* ─── 6. Outcomes (Donut + Friction) ──────────────────── */
+  function createOutcomes(data) {
+    const ins = data.insights;
+    if (!ins || !ins.outcomes || !ins.outcomes.length) return () => {};
+
+    const container = document.getElementById('viz-outcomes');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const cx = W / 2, cy = H / 2;
+    const radius = Math.min(W, H) * 0.3;
+
+    // ── Donut chart (outcomes) ──
+    const donutG = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+    const outcomeColors = {
+      'fully_achieved': '#9ece6a',
+      'mostly_achieved': '#7dcfff',
+      'partially_achieved': '#e0af68',
+      'not_achieved': '#f7768e',
+      'unclear_from_transcript': '#565f89',
+    };
+
+    const pie = d3.pie().value(d => d.count).sort(null).padAngle(0.03);
+    const arc = d3.arc().innerRadius(radius * 0.6).outerRadius(radius);
+    const arcHover = d3.arc().innerRadius(radius * 0.6).outerRadius(radius * 1.06);
+
+    const arcs = donutG.selectAll('path').data(pie(ins.outcomes)).join('path')
+      .attr('d', arc)
+      .attr('fill', d => outcomeColors[d.data.name] || '#565f89')
+      .attr('stroke', '#1a1b26').attr('stroke-width', 2)
+      .attr('opacity', 0)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.data.name.replace(/_/g,' ')}</strong><br>${d.data.count} sessions`, evt))
+      .on('mouseleave', function(evt, d) {
+        hideTip();
+        d3.select(this).transition().duration(200).attr('d', arc);
+      })
+      .on('mouseenter', function(evt, d) {
+        d3.select(this).transition().duration(200).attr('d', arcHover);
+      });
+
+    // Center text
+    const centerText = donutG.append('text')
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+      .attr('fill', '#c0caf5').attr('font-weight', 700).attr('font-size', '2rem')
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0);
+    const centerLabel = donutG.append('text')
+      .attr('text-anchor', 'middle').attr('y', 28)
+      .attr('fill', '#565f89').attr('font-size', '0.75rem').attr('font-weight', 500)
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0);
+
+    // Legend
+    const legendG = donutG.append('g').attr('transform', `translate(${radius + 30},${-radius + 10})`);
+    ins.outcomes.forEach((o, i) => {
+      const row = legendG.append('g').attr('transform', `translate(0,${i * 24})`);
+      row.append('rect').attr('width', 12).attr('height', 12).attr('rx', 3)
+        .attr('fill', outcomeColors[o.name] || '#565f89');
+      row.append('text').attr('x', 18).attr('y', 10)
+        .attr('fill', '#c0caf5').attr('font-size', '11px').attr('font-family', 'JetBrains Mono, monospace')
+        .text(`${o.name.replace(/_/g, ' ')} (${o.count})`);
+    });
+
+    // ── Friction bars (shown in step 1) ──
+    const frictionG = svg.append('g')
+      .attr('transform', `translate(${W * 0.15},${H * 0.15})`).attr('opacity', 0);
+
+    const frictionData = ins.friction;
+    const fH = H * 0.7;
+    const fW = W * 0.7;
+    const fY = d3.scaleBand().domain(frictionData.map(f => f.name)).range([0, fH]).padding(0.35);
+    const fX = d3.scaleLinear().domain([0, d3.max(frictionData, f => f.count) * 1.2]).range([0, fW]);
+
+    frictionG.append('text').attr('class', 'chart-title')
+      .attr('y', -15).text('Friction Points');
+
+    const frictionColors = { wrong_approach: '#f7768e', buggy_code: '#e0af68', tool_error: '#e0af68', misunderstood_request: '#f7768e' };
+
+    frictionG.selectAll('.f-label').data(frictionData).join('text')
+      .attr('class', 'bar-label')
+      .attr('x', -12).attr('y', d => fY(d.name) + fY.bandwidth() / 2)
+      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
+      .text(d => d.name.replace(/_/g, ' '));
+
+    frictionG.selectAll('.f-bar').data(frictionData).join('rect')
+      .attr('x', 0).attr('y', d => fY(d.name))
+      .attr('width', d => fX(d.count)).attr('height', fY.bandwidth())
+      .attr('rx', 4)
+      .attr('fill', d => frictionColors[d.name] || '#f7768e')
+      .attr('opacity', 0.85);
+
+    frictionG.selectAll('.f-val').data(frictionData).join('text')
+      .attr('class', 'bar-value')
+      .attr('x', d => fX(d.count) + 8).attr('y', d => fY(d.name) + fY.bandwidth() / 2)
+      .attr('dominant-baseline', 'central')
+      .text(d => d.count);
+
+    // ── Helpfulness donut (shown in step 2) ──
+    const helpG = svg.append('g').attr('transform', `translate(${cx},${cy})`).attr('opacity', 0);
+
+    const helpColors = {
+      'essential': '#9ece6a', 'very_helpful': '#7dcfff',
+      'moderately_helpful': '#e0af68', 'slightly_helpful': '#e0af68', 'unhelpful': '#f7768e',
+    };
+
+    const helpArcs = helpG.selectAll('path').data(pie(ins.helpfulness)).join('path')
+      .attr('d', arc)
+      .attr('fill', d => helpColors[d.data.name] || '#565f89')
+      .attr('stroke', '#1a1b26').attr('stroke-width', 2)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.data.name.replace(/_/g,' ')}</strong><br>${d.data.count} sessions`, evt))
+      .on('mouseleave', function() { hideTip(); d3.select(this).transition().duration(200).attr('d', arc); })
+      .on('mouseenter', function() { d3.select(this).transition().duration(200).attr('d', arcHover); });
+
+    const helpCenter = helpG.append('text')
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+      .attr('fill', '#c0caf5').attr('font-weight', 700).attr('font-size', '1.2rem')
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .text('Helpfulness');
+    const helpLegendG = helpG.append('g').attr('transform', `translate(${radius + 30},${-radius + 10})`);
+    ins.helpfulness.forEach((h, i) => {
+      const row = helpLegendG.append('g').attr('transform', `translate(0,${i * 24})`);
+      row.append('rect').attr('width', 12).attr('height', 12).attr('rx', 3)
+        .attr('fill', helpColors[h.name] || '#565f89');
+      row.append('text').attr('x', 18).attr('y', 10)
+        .attr('fill', '#c0caf5').attr('font-size', '11px').attr('font-family', 'JetBrains Mono, monospace')
+        .text(`${h.name.replace(/_/g, ' ')} (${h.count})`);
+    });
+
+    const achieved = ins.outcomes.filter(o => o.name === 'fully_achieved' || o.name === 'mostly_achieved');
+    const achievedPct = Math.round(achieved.reduce((s,o) => s+o.count, 0) / ins.totalFacets * 100);
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        donutG.transition().duration(400).attr('opacity', 1);
+        frictionG.transition().duration(400).attr('opacity', 0);
+        helpG.transition().duration(400).attr('opacity', 0);
+        arcs.transition().duration(800).delay((_, i) => i * 120)
+          .attr('opacity', 1);
+        centerText.transition().delay(600).duration(500)
+          .attr('opacity', 1).text(`${achievedPct}%`);
+        centerLabel.transition().delay(700).duration(400)
+          .attr('opacity', 1).text('success rate');
+      } else if (step === 1) {
+        donutG.transition().duration(400).attr('opacity', 0);
+        helpG.transition().duration(400).attr('opacity', 0);
+        frictionG.transition().delay(300).duration(600).attr('opacity', 1);
+      } else if (step === 2) {
+        donutG.transition().duration(400).attr('opacity', 0);
+        frictionG.transition().duration(400).attr('opacity', 0);
+        helpG.transition().delay(300).duration(600).attr('opacity', 1);
+      }
+    };
+  }
+  </script>
+</body>
+</html>
