@@ -4,6 +4,8 @@ data.json
 # Python
 __pycache__/
 *.pyc
+venv/
+.venv/
 
 # OS
 .DS_Store
@@ -11,3 +13,13 @@ Thumbs.db
 
 # Claude Code project files
 .claude/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Env
+.env
+.env.*

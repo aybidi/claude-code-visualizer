@@ -479,7 +479,7 @@
     const sonnet = data.models.find(m => m.name.includes('sonnet'));
     const meta = document.getElementById('hero-meta');
     meta.innerHTML = `
-      <span>${fmtDate(o.firstDate)} – ${fmtDate(o.lastDate)}, 2026</span>
+      <span>${fmtDate(o.firstDate)} – ${fmtDate(o.lastDate)}, ${new Date(o.lastDate).getUTCFullYear()}</span>
       <span class="dot"></span>
       <span>${data.projects.length} projects</span>
       <span class="dot"></span>
