@@ -1027,13 +1027,28 @@
         `<strong>${DAYS[d.day]} ${d.hour}:00 UTC</strong><br>${d.count} messages`, evt))
       .on('mouseleave', hideTip);
 
-    // Weekend highlight overlay
-    const weekendOverlay = g.append('rect')
-      .attr('x', 0).attr('y', 5 * cellH)
-      .attr('width', w).attr('height', 2 * cellH)
+    // Determine dominant days pattern
+    const wk = data.weekly;
+    const weekendCount = wk[5].count + wk[6].count;
+    const weekendPct = Math.round(weekendCount / data.overview.totalMessages * 100);
+    const isWeekendHeavy = weekendPct > 35;
+    const isWeekdayHeavy = weekendPct < 25;
+    // Find the top 2 days for "even" pattern highlight
+    const sortedDays = wk.map((d, i) => ({ day: i, count: d.count })).sort((a, b) => b.count - a.count);
+    const topDays = new Set(sortedDays.slice(0, 2).map(d => d.day));
+
+    // Highlight overlay — position based on pattern
+    const highlightDays = isWeekendHeavy ? [5, 6] : isWeekdayHeavy ? [0, 1, 2, 3, 4] : [...topDays];
+    const hlMinDay = Math.min(...highlightDays);
+    const hlMaxDay = Math.max(...highlightDays);
+    const hlOverlay = g.append('rect')
+      .attr('x', 0).attr('y', hlMinDay * cellH)
+      .attr('width', w).attr('height', (hlMaxDay - hlMinDay + 1) * cellH)
       .attr('fill', 'none').attr('stroke', '#f7768e')
       .attr('stroke-width', 2).attr('rx', 4)
       .attr('opacity', 0).attr('pointer-events', 'none');
+
+    const highlightSet = new Set(highlightDays);
 
     let lastStep = -1;
     return function update(step) {
@@ -1042,16 +1057,16 @@
       if (step === 0) {
         cells.transition().duration(600).delay((_, i) => i * 2)
           .attr('fill', d => color(d.count));
-        weekendOverlay.transition().duration(400).attr('opacity', 0);
+        hlOverlay.transition().duration(400).attr('opacity', 0);
       } else if (step === 1) {
         cells.transition().duration(500)
           .attr('fill', d => color(d.count))
-          .attr('opacity', d => (d.day >= 5) ? 1 : 0.2);
-        weekendOverlay.transition().duration(500).attr('opacity', 1);
+          .attr('opacity', d => highlightSet.has(d.day) ? 1 : 0.2);
+        hlOverlay.transition().duration(500).attr('opacity', 1);
       } else if (step === 2) {
         cells.transition().duration(500)
           .attr('fill', d => color(d.count)).attr('opacity', 1);
-        weekendOverlay.transition().duration(400).attr('opacity', 0);
+        hlOverlay.transition().duration(400).attr('opacity', 0);
       }
     };
   }

@@ -1,5 +1,6 @@
 # Generated data (contains your personal session data)
 data.json
+sample-data/
 
 # Python
 __pycache__/
