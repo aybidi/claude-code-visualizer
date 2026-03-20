@@ -1,4 +1,4 @@
-# cc-visualizer
+# claude-code-visualizer
 
 A scrollytelling visualization of your local [Claude Code](https://docs.anthropic.com/en/docs/claude-code) usage data. See your sessions, projects, tools, coding rhythm, and AI-generated insights — all rendered as an interactive, scroll-driven narrative in the style of [R2D3](http://www.r2d3.us/).
 
@@ -26,8 +26,8 @@ https://github.com/user-attachments/assets/4f194751-f81f-473f-aa35-3203a7c414d6
 
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/cc-visualizer.git
-cd cc-visualizer
+git clone git@github.com:aybidi/claude-code-visualizer.git
+cd claude-code-visualizer
 
 # 2. Generate your data (reads from ~/.claude/)
 python3 process_data.py
