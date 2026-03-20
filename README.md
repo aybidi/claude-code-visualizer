@@ -19,6 +19,9 @@ The visualization walks you through 6 interactive sections:
 
 Each section uses scroll-triggered animations — the visualization updates as you read the narrative text beside it.
 
+https://github.com/user-attachments/assets/4f194751-f81f-473f-aa35-3203a7c414d6
+
+
 ## Quick Start
 
 ```bash
