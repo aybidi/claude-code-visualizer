@@ -248,7 +248,7 @@
     .bar-label { font-size: 11px; fill: var(--text-muted); font-weight: 400; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
     .bar-value { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
     .bar-prompt { font-size: 11px; fill: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
-    .bar-blocks { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; letter-spacing: -0.5px; }
+    .bar-blocks { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 1.5px; }
     .term-cursor {
       animation: blink-cursor 1s step-end infinite;
     }
@@ -295,7 +295,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-value" id="stat-tokens">0</div>
-        <div class="stat-label">tokens</div>
+        <div class="stat-label">total tokens</div>
       </div>
     </div>
     <div class="hero-meta" id="hero-meta"></div>
@@ -602,7 +602,7 @@
       <h2>the full picture</h2>
       <p class="outro-subtitle">a snapshot of ${o.daySpan} days of building, exploring, and learning with ai</p>
       <div class="outro-grid">
-        <div class="outro-card"><div class="val">${fmtNum(o.totalOutputTokens)}</div><div class="lbl">tokens generated</div></div>
+        <div class="outro-card"><div class="val">${fmtNum(o.totalOutputTokens)}</div><div class="lbl">output tokens</div></div>
         <div class="outro-card"><div class="val">${cacheHitPct}%</div><div class="lbl">cache hit rate</div></div>
         <div class="outro-card"><div class="val">${ss.maxMessages}</div><div class="lbl">longest session (msgs)</div></div>
         <div class="outro-card"><div class="val">${Math.round(ss.avgMessages)}</div><div class="lbl">avg messages / session</div></div>
@@ -843,7 +843,7 @@
     const tools = data.tools.slice(0, 8);
     const maxCount = d3.max(tools, t => t.count);
     const labelStartX = 115; // prompt + 12-char label
-    const charW = 8.1;
+    const charW = 10.0;
     const maxBlocks = Math.max(10, Math.floor((w - labelStartX - 60) / charW));
     const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
     const rowH = Math.min(h / tools.length, 36);
@@ -902,7 +902,7 @@
 
     function getBlockWidth(count) {
       const n = Math.max(1, Math.round((count / maxCount) * maxBlocks));
-      return n * 8.1; // approximate char width
+      return n * 10.0; // approximate char width
     }
 
     let lastStep = -1;
@@ -920,10 +920,10 @@
       for (let c = 0; c <= fullStr.length; c++) {
         typeTimers.push(setTimeout(() => {
           textEl.text(fullStr.substring(0, c));
-          cursorEl.attr('x', 115 + c * 8.1);
+          cursorEl.attr('x', 115 + c * 10.0);
           if (c === fullStr.length) {
             cursorEl.attr('opacity', 1);
-            valEl.attr('x', 115 + fullStr.length * 8.1 + 14).attr('opacity', 1);
+            valEl.attr('x', 115 + fullStr.length * 10.0 + 14).attr('opacity', 1);
           }
         }, delay + c * charTime));
       }
@@ -1059,7 +1059,7 @@
     const fmtName = n => n.replace(/_/g, ' ');
     const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
     const rowH = Math.min((H - m.t - m.b) / goals.length, 32);
-    const charW = 8.1;
+    const charW = 10.0;
 
     function buildTermRows(parent, items, maxVal, colors, labelWidth) {
       const rows = parent.selectAll('.term-row').data(items).join('g')
@@ -1120,9 +1120,9 @@
         for (let c = 0; c <= fullStr.length; c++) {
           typeTimers.push(setTimeout(() => {
             bt.text(fullStr.substring(0, c));
-            cu.attr('x', chart.bx + c * 8.1);
+            cu.attr('x', chart.bx + c * 10.0);
             if (c === fullStr.length) {
-              vl.attr('x', chart.bx + fullStr.length * 8.1 + 14).attr('opacity', 1);
+              vl.attr('x', chart.bx + fullStr.length * 10.0 + 14).attr('opacity', 1);
             }
           }, lineDelay + c * 20));
         }
@@ -1238,7 +1238,7 @@
     const maxFriction = d3.max(frictionData, f => f.count) || 1;
     const fColors = ['#f7768e','#e0af68','#e0af68','#f7768e','#bb9af7'];
     const fLabelW = 22;
-    const fCharW = 8.1;
+    const fCharW = 10.0;
     const fAvailW = W * 0.7;
     const fBxStart = 18 + fLabelW * 7.2;
     const fMaxBlocks = Math.max(10, Math.floor((fAvailW - fBxStart - 60) / fCharW));
@@ -1329,9 +1329,9 @@
         for (let c = 0; c <= fullStr.length; c++) {
           fTypeTimers.push(setTimeout(() => {
             bt.text(fullStr.substring(0, c));
-            cu.attr('x', frictionChart.bx + c * 8.1);
+            cu.attr('x', frictionChart.bx + c * 10.0);
             if (c === fullStr.length) {
-              vl.attr('x', frictionChart.bx + fullStr.length * 8.1 + 14).attr('opacity', 1);
+              vl.attr('x', frictionChart.bx + fullStr.length * 10.0 + 14).attr('opacity', 1);
             }
           }, lineDelay + c * 20));
         }
