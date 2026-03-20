@@ -505,52 +505,68 @@
     const second = tl.filter(d => d.date !== busiest.date).reduce((a, b) => a.messages > b.messages ? a : b);
     const totalDays = tl.length;
 
+    const firstDay = tl[0];
+    const firstTwoMsgs = tl.slice(0, 2).reduce((s, d) => s + d.messages, 0);
     document.getElementById('tl-step-0').innerHTML = `<p>it started on <span class="hl">${fmtDate(data.overview.firstDate)}</span>.
-      that first day, you dove in deep — <span class="hl">${fmtFull(busiest.messages)} messages</span> across
-      <span class="hl">${busiest.sessions} sessions</span>. something clicked.</p>`;
-    document.getElementById('tl-step-1').innerHTML = `<p>the next day was nearly as intense:
-      <span class="hl">${fmtFull(second.messages)} messages</span>.
-      in just 48 hours, you'd exchanged over <span class="hl">1,000 messages</span> with claude.</p>`;
-    document.getElementById('tl-step-2').innerHTML = `<p>after that opening sprint, a rhythm emerged.
-      focused bursts of activity across <span class="hl">${totalDays} active days</span>,
-      with quiet stretches in between.</p>`;
+      that first day, you sent <span class="hl">${fmtFull(firstDay.messages)} messages</span> across
+      <span class="hl">${firstDay.sessions} session${firstDay.sessions > 1 ? 's' : ''}</span>. something clicked.</p>`;
+    document.getElementById('tl-step-1').innerHTML = `<p>your busiest day was <span class="hl">${fmtDate(busiest.date)}</span>
+      with <span class="hl">${fmtFull(busiest.messages)} messages</span> across ${busiest.sessions} sessions.
+      ${second.messages > busiest.messages * 0.8
+        ? `<span class="hl">${fmtDate(second.date)}</span> came close with ${fmtFull(second.messages)}.`
+        : `that's ${Math.round(busiest.messages / (data.overview.totalMessages / totalDays))}x your daily average.`}</p>`;
+    document.getElementById('tl-step-2').innerHTML = `<p>over ${data.overview.daySpan} days, a rhythm emerged.
+      <span class="hl">${totalDays} active days</span> of focused work,
+      with ${data.overview.daySpan - totalDays} quiet days in between — ${totalDays > data.overview.daySpan * 0.6 ? 'a steady cadence.' : 'intense bursts followed by rest.'}</p>`;
 
     const pj = data.projects;
     const top = pj[0];
+    const topPct = Math.round(top.messages / data.overview.totalMessages * 100);
     document.getElementById('pj-step-0').innerHTML = `<p>you explored
-      <span class="hl">${pj.length} distinct projects</span> — from flashcard apps to llm inference engines.
+      <span class="hl">${pj.length} distinct projects</span>.
       each bubble represents one project, sized by how much you and claude talked about it.</p>`;
     document.getElementById('pj-step-1').innerHTML = `<p><span class="hl">${top.name}</span> leads the pack
-      with <span class="hl">${fmtFull(top.messages)} messages</span> across ${top.sessions} sessions.
-      this was your deepest collaboration.</p>`;
+      with <span class="hl">${fmtFull(top.messages)} messages</span> across ${top.sessions} sessions —
+      ${topPct}% of all your conversations.</p>`;
     document.getElementById('pj-step-2').innerHTML = `<p>${pj.length > 3
-      ? `<span class="hl-pink">${pj[1].name}</span>, <span class="hl-green">${pj[2].name}</span>, and <span class="hl-amber">${pj[3].name}</span> form a tight cluster around 250 messages each — showing how you spread your curiosity across multiple domains.`
-      : 'your projects span a diverse range of domains.'}</p>`;
+      ? `<span class="hl-pink">${pj[1].name}</span> (${fmtFull(pj[1].messages)}), <span class="hl-green">${pj[2].name}</span> (${fmtFull(pj[2].messages)}), and <span class="hl-amber">${pj[3].name}</span> (${fmtFull(pj[3].messages)}) round out the top four${pj[1].messages - pj[3].messages < pj[1].messages * 0.3 ? ' — tightly clustered, showing broad curiosity.' : '.'}`
+      : 'your projects span a diverse range of work.'}</p>`;
 
     const tools = data.tools;
     const totalTools = tools.reduce((s, t) => s + t.count, 0);
     document.getElementById('tl2-step-0').innerHTML = `<p>behind every conversation, claude used tools —
       <span class="hl">${fmtFull(totalTools)} invocations</span> across
       <span class="hl">${tools.length} different tools</span>.</p>`;
+    const toolPct = Math.round(tools[0].count / totalTools * 100);
     document.getElementById('tl2-step-1').innerHTML = `<p><span class="hl preserve-case">${tools[0].name}</span> dominated
-      with <span class="hl">${tools[0].count} uses</span>. claude's first instinct is always to
-      understand your code before changing it.</p>`;
+      with <span class="hl">${fmtFull(tools[0].count)} uses</span> — ${toolPct}% of all tool calls.</p>`;
     document.getElementById('tl2-step-2').innerHTML = `<p><span class="hl-pink preserve-case">${tools[1].name}</span>
-      comes next at ${tools[1].count}, followed by the writing tools:
-      <span class="hl-green preserve-case">${tools[2].name}</span> and <span class="hl-amber preserve-case">${tools[3].name}</span>.
-      <span class="preserve-case">Read → Think → Write</span> — a deliberate workflow.</p>`;
+      comes next at ${fmtFull(tools[1].count)}${tools.length > 3 ? `, followed by
+      <span class="hl-green preserve-case">${tools[2].name}</span> (${fmtFull(tools[2].count)}) and <span class="hl-amber preserve-case">${tools[3].name}</span> (${fmtFull(tools[3].count)})` : ''}.
+      ${tools[0].name === 'Read' ? 'read first, act second — a deliberate workflow.' :
+        tools[0].name === 'Edit' ? 'editing was the primary mode — hands-on from the start.' :
+        tools[0].name === 'Bash' ? 'command-line heavy — claude spent most of its time executing.' :
+        'a clear preference in how claude works with you.'}</p>`;
 
 
-    const weekendPct = Math.round((data.weekly[5].count + data.weekly[6].count) / data.overview.totalMessages * 100);
+    const weekendCount = data.weekly[5].count + data.weekly[6].count;
+    const weekdayCount = data.overview.totalMessages - weekendCount;
+    const weekendPct = Math.round(weekendCount / data.overview.totalMessages * 100);
     const peakHour = data.hourly.reduce((a, b) => a.count > b.count ? a : b);
     const peakDay = data.weekly.reduce((a, b) => a.count > b.count ? a : b);
+    const isWeekendHeavy = weekendPct > 35;
+    const isEvenSplit = weekendPct >= 25 && weekendPct <= 35;
+    const timeOfDay = peakHour.hour < 6 ? 'night owl' : peakHour.hour < 12 ? 'morning' : peakHour.hour < 17 ? 'afternoon' : peakHour.hour < 21 ? 'evening' : 'late night';
     document.getElementById('rh-step-0').innerHTML = `<p>when do you code with claude? this heatmap maps
       your activity by <span class="hl">day of week</span> and <span class="hl">hour</span> (utc).</p>`;
-    document.getElementById('rh-step-1').innerHTML = `<p>you're a <span class="hl">weekend warrior</span> —
-      saturday and sunday account for <span class="hl">${weekendPct}%</span> of all messages.</p>`;
+    document.getElementById('rh-step-1').innerHTML = `<p>${isWeekendHeavy
+      ? `you're a <span class="hl">weekend warrior</span> — saturday and sunday account for <span class="hl">${weekendPct}%</span> of all messages.`
+      : isEvenSplit
+        ? `your activity is <span class="hl">evenly spread</span> across the week — weekends make up <span class="hl">${weekendPct}%</span>, weekdays the rest.`
+        : `you're a <span class="hl">weekday coder</span> — ${100 - weekendPct}% of your messages happen monday through friday.`}</p>`;
     document.getElementById('rh-step-2').innerHTML = `<p>peak hour: <span class="hl">${peakHour.hour}:00 utc</span>
-      with ${fmtFull(peakHour.count)} messages. <span class="hl">${DAYS[peakDay.day]}</span> is your
-      most active day overall.</p>`;
+      with ${fmtFull(peakHour.count)} messages — you're an <span class="hl">${timeOfDay}</span> coder.
+      <span class="hl">${DAYS[peakDay.day]}</span> is your most active day overall.</p>`;
 
     // ── Goals section ──
     const ins = data.insights;
@@ -565,10 +581,10 @@
         ${ins.goals.length > 2 ? `<span class="hl-pink">${fmtGoalName(ins.goals[1].name)}</span> and
         <span class="hl-green">${fmtGoalName(ins.goals[2].name)}</span> round out the top three.` : ''}</p>`;
       const stTop = ins.sessionTypes[0];
+      const stPct = Math.round(stTop.count / ins.totalFacets * 100);
       document.getElementById('gl-step-2').innerHTML = `<p>your most common session type is
-        <span class="hl">${fmtGoalName(stTop.name)}</span> (${stTop.count} sessions).
-        you use claude as a <span class="hl-amber">learning &amp; exploration</span> tool
-        as much as a coding assistant.</p>`;
+        <span class="hl">${fmtGoalName(stTop.name)}</span> — ${stPct}% of sessions (${stTop.count} total).
+        ${ins.sessionTypes.length > 2 ? `<span class="hl-amber">${fmtGoalName(ins.sessionTypes[1].name)}</span> and <span class="hl-pink">${fmtGoalName(ins.sessionTypes[2].name)}</span> follow.` : ''}</p>`;
     }
 
     // ── Outcomes section ──
