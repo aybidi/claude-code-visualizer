@@ -39,7 +39,9 @@
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      text-transform: lowercase;
     }
+    .preserve-case, .preserve-case * { text-transform: none; }
 
     /* ─── Loading ─────────────────────────────────────────── */
     .loading-screen {
@@ -70,7 +72,7 @@
     .hero > * { position: relative; z-index: 1; }
     .hero-label {
       font-size: 0.75rem; font-weight: 600;
-      letter-spacing: 0.2em; text-transform: uppercase;
+      letter-spacing: 0.2em; text-transform: lowercase;
       color: var(--accent); margin-bottom: 1.5rem;
     }
     .hero h1 {
@@ -96,7 +98,7 @@
     }
     .stat-label {
       font-size: 0.8rem; font-weight: 500;
-      color: rgba(255,255,255,0.45); text-transform: uppercase;
+      color: rgba(255,255,255,0.45); text-transform: lowercase;
       letter-spacing: 0.12em; margin-top: 0.25rem;
     }
     .hero-meta {
@@ -108,7 +110,7 @@
     .scroll-hint {
       position: absolute; bottom: 2.5rem;
       font-size: 0.75rem; font-weight: 500;
-      letter-spacing: 0.15em; text-transform: uppercase;
+      letter-spacing: 0.15em; text-transform: lowercase;
       color: rgba(255,255,255,0.3);
       animation: pulse 2s ease-in-out infinite;
     }
@@ -225,7 +227,7 @@
     }
     .outro-card .lbl {
       font-size: 0.78rem; color: rgba(255,255,255,0.4);
-      text-transform: uppercase; letter-spacing: 0.1em;
+      text-transform: lowercase; letter-spacing: 0.1em;
       margin-top: 0.25rem;
     }
     .outro-note {
@@ -243,8 +245,17 @@
     }
     .annotation-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3,3; }
     .annotation-text { font-size: 11px; fill: var(--cyan); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
-    .bar-label { font-size: 12px; fill: var(--text); font-weight: 500; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-label { font-size: 11px; fill: var(--text-muted); font-weight: 400; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
     .bar-value { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-prompt { font-size: 11px; fill: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-blocks { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; letter-spacing: -0.5px; }
+    .term-cursor {
+      animation: blink-cursor 1s step-end infinite;
+    }
+    @keyframes blink-cursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
     .heatmap-label { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
 
     /* ─── Responsive ──────────────────────────────────────── */
@@ -266,36 +277,36 @@
   <div class="loading-screen">Loading your data...</div>
 
   <!-- Tooltip -->
-  <div class="tooltip" id="tooltip"></div>
+  <div class="tooltip preserve-case" id="tooltip"></div>
 
   <!-- ═══ Hero ═══ -->
   <section class="hero">
-    <div class="hero-label">Claude Code Analytics</div>
-    <h1>Your Claude Code Story</h1>
+    <div class="hero-label">claude code analytics</div>
+    <h1>your claude code story</h1>
     <p class="hero-subtitle" id="hero-subtitle"></p>
     <div class="hero-stats">
       <div class="stat-card">
         <div class="stat-value" id="stat-sessions">0</div>
-        <div class="stat-label">Sessions</div>
+        <div class="stat-label">sessions</div>
       </div>
       <div class="stat-card">
         <div class="stat-value" id="stat-messages">0</div>
-        <div class="stat-label">Messages</div>
+        <div class="stat-label">messages</div>
       </div>
       <div class="stat-card">
         <div class="stat-value" id="stat-tokens">0</div>
-        <div class="stat-label">Tokens</div>
+        <div class="stat-label">tokens</div>
       </div>
     </div>
     <div class="hero-meta" id="hero-meta"></div>
-    <div class="scroll-hint">Scroll to explore</div>
+    <div class="scroll-hint">scroll to explore</div>
   </section>
 
   <!-- ═══ Section 1: Timeline ═══ -->
   <div class="section-intro">
     <span class="section-num">01</span>
-    <h2>The Timeline</h2>
-    <p>Your activity day by day</p>
+    <h2>the timeline</h2>
+    <p>your activity day by day</p>
   </div>
   <section class="scroll-section" id="sec-timeline">
     <div class="scroll-text">
@@ -311,8 +322,8 @@
   <!-- ═══ Section 2: Projects ═══ -->
   <div class="section-intro">
     <span class="section-num">02</span>
-    <h2>Your Projects</h2>
-    <p>What you've been building</p>
+    <h2>your projects</h2>
+    <p>what you've been building</p>
   </div>
   <section class="scroll-section" id="sec-projects">
     <div class="scroll-text">
@@ -328,8 +339,8 @@
   <!-- ═══ Section 3: Tools ═══ -->
   <div class="section-intro">
     <span class="section-num">03</span>
-    <h2>The Tool Belt</h2>
-    <p>How Claude helped you code</p>
+    <h2>the tool belt</h2>
+    <p>how claude helped you code</p>
   </div>
   <section class="scroll-section" id="sec-tools">
     <div class="scroll-text">
@@ -345,8 +356,8 @@
   <!-- ═══ Section 4: Rhythm ═══ -->
   <div class="section-intro">
     <span class="section-num">04</span>
-    <h2>Your Rhythm</h2>
-    <p>When the magic happens</p>
+    <h2>your rhythm</h2>
+    <p>when the magic happens</p>
   </div>
   <section class="scroll-section" id="sec-rhythm">
     <div class="scroll-text">
@@ -362,8 +373,8 @@
   <!-- ═══ Section 5: Goals & Intentions ═══ -->
   <div class="section-intro">
     <span class="section-num">05</span>
-    <h2>Your Intentions</h2>
-    <p>What you were trying to accomplish</p>
+    <h2>your intentions</h2>
+    <p>what you were trying to accomplish</p>
   </div>
   <section class="scroll-section" id="sec-goals">
     <div class="scroll-text">
@@ -379,8 +390,8 @@
   <!-- ═══ Section 6: Outcomes & Quality ═══ -->
   <div class="section-intro">
     <span class="section-num">06</span>
-    <h2>How It Went</h2>
-    <p>Outcomes, friction, and what worked</p>
+    <h2>how it went</h2>
+    <p>outcomes, friction, and what worked</p>
   </div>
   <section class="scroll-section" id="sec-outcomes">
     <div class="scroll-text">
@@ -459,15 +470,15 @@
     })
     .catch(err => {
       document.querySelector('.loading-screen').innerHTML =
-        '<div style="text-align:center;max-width:420px"><p style="margin-bottom:1rem">Could not load data.json</p>' +
-        '<p style="opacity:0.5;font-size:0.85rem">Run: <code>python3 process_data.py && python3 -m http.server</code></p></div>';
+        '<div style="text-align:center;max-width:420px"><p style="margin-bottom:1rem">could not load data.json</p>' +
+        '<p style="opacity:0.5;font-size:0.85rem">run: <code class="preserve-case">python3 process_data.py && python3 -m http.server</code></p></div>';
     });
 
   /* ─── Hero ────────────────────────────────────────────── */
   function initHero(data) {
     const o = data.overview;
     document.getElementById('hero-subtitle').textContent =
-      `${o.daySpan} days of AI-assisted coding`;
+      `${o.daySpan} days of ai-assisted coding`;
 
     setTimeout(() => {
       animateValue(document.getElementById('stat-sessions'), o.totalSessions, 1200);
@@ -483,7 +494,7 @@
       <span class="dot"></span>
       <span>${data.projects.length} projects</span>
       <span class="dot"></span>
-      <span>${opus ? fmtFull(opus.count) : '—'} Opus + ${sonnet ? fmtFull(sonnet.count) : '—'} Sonnet responses</span>
+      <span>${opus ? fmtFull(opus.count) : '—'} opus + ${sonnet ? fmtFull(sonnet.count) : '—'} sonnet responses</span>
     `;
   }
 
@@ -494,49 +505,50 @@
     const second = tl.filter(d => d.date !== busiest.date).reduce((a, b) => a.messages > b.messages ? a : b);
     const totalDays = tl.length;
 
-    document.getElementById('tl-step-0').innerHTML = `<p>It started on <span class="hl">${fmtDate(data.overview.firstDate)}</span>.
-      That first day, you dove in deep — <span class="hl">${fmtFull(busiest.messages)} messages</span> across
-      <span class="hl">${busiest.sessions} sessions</span>. Something clicked.</p>`;
-    document.getElementById('tl-step-1').innerHTML = `<p>The next day was nearly as intense:
+    document.getElementById('tl-step-0').innerHTML = `<p>it started on <span class="hl">${fmtDate(data.overview.firstDate)}</span>.
+      that first day, you dove in deep — <span class="hl">${fmtFull(busiest.messages)} messages</span> across
+      <span class="hl">${busiest.sessions} sessions</span>. something clicked.</p>`;
+    document.getElementById('tl-step-1').innerHTML = `<p>the next day was nearly as intense:
       <span class="hl">${fmtFull(second.messages)} messages</span>.
-      In just 48 hours, you'd exchanged over <span class="hl">1,000 messages</span> with Claude.</p>`;
-    document.getElementById('tl-step-2').innerHTML = `<p>After that opening sprint, a rhythm emerged.
-      Focused bursts of activity across <span class="hl">${totalDays} active days</span>,
+      in just 48 hours, you'd exchanged over <span class="hl">1,000 messages</span> with claude.</p>`;
+    document.getElementById('tl-step-2').innerHTML = `<p>after that opening sprint, a rhythm emerged.
+      focused bursts of activity across <span class="hl">${totalDays} active days</span>,
       with quiet stretches in between.</p>`;
 
     const pj = data.projects;
     const top = pj[0];
-    document.getElementById('pj-step-0').innerHTML = `<p>You explored
-      <span class="hl">${pj.length} distinct projects</span> — from flashcard apps to LLM inference engines.
-      Each bubble represents one project, sized by how much you and Claude talked about it.</p>`;
+    document.getElementById('pj-step-0').innerHTML = `<p>you explored
+      <span class="hl">${pj.length} distinct projects</span> — from flashcard apps to llm inference engines.
+      each bubble represents one project, sized by how much you and claude talked about it.</p>`;
     document.getElementById('pj-step-1').innerHTML = `<p><span class="hl">${top.name}</span> leads the pack
       with <span class="hl">${fmtFull(top.messages)} messages</span> across ${top.sessions} sessions.
-      This was your deepest collaboration.</p>`;
+      this was your deepest collaboration.</p>`;
     document.getElementById('pj-step-2').innerHTML = `<p>${pj.length > 3
       ? `<span class="hl-pink">${pj[1].name}</span>, <span class="hl-green">${pj[2].name}</span>, and <span class="hl-amber">${pj[3].name}</span> form a tight cluster around 250 messages each — showing how you spread your curiosity across multiple domains.`
-      : 'Your projects span a diverse range of domains.'}</p>`;
+      : 'your projects span a diverse range of domains.'}</p>`;
 
     const tools = data.tools;
     const totalTools = tools.reduce((s, t) => s + t.count, 0);
-    document.getElementById('tl2-step-0').innerHTML = `<p>Behind every conversation, Claude used tools —
+    document.getElementById('tl2-step-0').innerHTML = `<p>behind every conversation, claude used tools —
       <span class="hl">${fmtFull(totalTools)} invocations</span> across
       <span class="hl">${tools.length} different tools</span>.</p>`;
-    document.getElementById('tl2-step-1').innerHTML = `<p><span class="hl">${tools[0].name}</span> dominated
-      with <span class="hl">${tools[0].count} uses</span>. Claude's first instinct is always to
+    document.getElementById('tl2-step-1').innerHTML = `<p><span class="hl preserve-case">${tools[0].name}</span> dominated
+      with <span class="hl">${tools[0].count} uses</span>. claude's first instinct is always to
       understand your code before changing it.</p>`;
-    document.getElementById('tl2-step-2').innerHTML = `<p><span class="hl-pink">${tools[1].name}</span>
+    document.getElementById('tl2-step-2').innerHTML = `<p><span class="hl-pink preserve-case">${tools[1].name}</span>
       comes next at ${tools[1].count}, followed by the writing tools:
-      <span class="hl-green">${tools[2].name}</span> and <span class="hl-amber">${tools[3].name}</span>.
-      Read → Think → Write — a deliberate workflow.</p>`;
+      <span class="hl-green preserve-case">${tools[2].name}</span> and <span class="hl-amber preserve-case">${tools[3].name}</span>.
+      <span class="preserve-case">Read → Think → Write</span> — a deliberate workflow.</p>`;
+
 
     const weekendPct = Math.round((data.weekly[5].count + data.weekly[6].count) / data.overview.totalMessages * 100);
     const peakHour = data.hourly.reduce((a, b) => a.count > b.count ? a : b);
     const peakDay = data.weekly.reduce((a, b) => a.count > b.count ? a : b);
-    document.getElementById('rh-step-0').innerHTML = `<p>When do you code with Claude? This heatmap maps
-      your activity by <span class="hl">day of week</span> and <span class="hl">hour</span> (UTC).</p>`;
-    document.getElementById('rh-step-1').innerHTML = `<p>You're a <span class="hl">weekend warrior</span> —
-      Saturday and Sunday account for <span class="hl">${weekendPct}%</span> of all messages.</p>`;
-    document.getElementById('rh-step-2').innerHTML = `<p>Peak hour: <span class="hl">${peakHour.hour}:00 UTC</span>
+    document.getElementById('rh-step-0').innerHTML = `<p>when do you code with claude? this heatmap maps
+      your activity by <span class="hl">day of week</span> and <span class="hl">hour</span> (utc).</p>`;
+    document.getElementById('rh-step-1').innerHTML = `<p>you're a <span class="hl">weekend warrior</span> —
+      saturday and sunday account for <span class="hl">${weekendPct}%</span> of all messages.</p>`;
+    document.getElementById('rh-step-2').innerHTML = `<p>peak hour: <span class="hl">${peakHour.hour}:00 utc</span>
       with ${fmtFull(peakHour.count)} messages. <span class="hl">${DAYS[peakDay.day]}</span> is your
       most active day overall.</p>`;
 
@@ -545,17 +557,17 @@
     if (ins && ins.goals && ins.goals.length) {
       const topGoal = ins.goals[0];
       const fmtGoalName = n => n.replace(/_/g, ' ');
-      document.getElementById('gl-step-0').innerHTML = `<p>Across ${ins.totalFacets} analyzed sessions, Claude identified
+      document.getElementById('gl-step-0').innerHTML = `<p>across ${ins.totalFacets} analyzed sessions, claude identified
         <span class="hl">${ins.goals.length} distinct goal types</span> in your usage.
-        Each bubble shows what you were trying to accomplish.</p>`;
+        each bubble shows what you were trying to accomplish.</p>`;
       document.getElementById('gl-step-1').innerHTML = `<p><span class="hl">${fmtGoalName(topGoal.name)}</span> was
         your top goal with <span class="hl">${topGoal.count} sessions</span>.
         ${ins.goals.length > 2 ? `<span class="hl-pink">${fmtGoalName(ins.goals[1].name)}</span> and
         <span class="hl-green">${fmtGoalName(ins.goals[2].name)}</span> round out the top three.` : ''}</p>`;
       const stTop = ins.sessionTypes[0];
-      document.getElementById('gl-step-2').innerHTML = `<p>Your most common session type is
+      document.getElementById('gl-step-2').innerHTML = `<p>your most common session type is
         <span class="hl">${fmtGoalName(stTop.name)}</span> (${stTop.count} sessions).
-        You use Claude as a <span class="hl-amber">learning &amp; exploration</span> tool
+        you use claude as a <span class="hl-amber">learning &amp; exploration</span> tool
         as much as a coding assistant.</p>`;
     }
 
@@ -563,18 +575,18 @@
     if (ins && ins.outcomes && ins.outcomes.length) {
       const achieved = ins.outcomes.filter(o => o.name === 'fully_achieved' || o.name === 'mostly_achieved');
       const achievedPct = Math.round(achieved.reduce((s,o) => s+o.count, 0) / ins.totalFacets * 100);
-      document.getElementById('oc-step-0').innerHTML = `<p>How did your sessions go?
+      document.getElementById('oc-step-0').innerHTML = `<p>how did your sessions go?
         <span class="hl">${achievedPct}% of sessions</span> were fully or mostly achieved.
-        The donut shows the outcome breakdown.</p>`;
+        the donut shows the outcome breakdown.</p>`;
       const topFriction = ins.friction.length > 0 ? ins.friction[0] : null;
       document.getElementById('oc-step-1').innerHTML = `<p>${topFriction
-        ? `The most common friction point was <span class="hl-pink">${topFriction.name.replace(/_/g,' ')}</span> (${topFriction.count} times). ${ins.friction.length > 1 ? `<span class="hl-amber">${ins.friction[1].name.replace(/_/g,' ')}</span> hit ${ins.friction[1].count} times.` : ''}`
-        : 'Remarkably few friction points.'}</p>`;
+        ? `the most common friction point was <span class="hl-pink">${topFriction.name.replace(/_/g,' ')}</span> (${topFriction.count} times). ${ins.friction.length > 1 ? `<span class="hl-amber">${ins.friction[1].name.replace(/_/g,' ')}</span> hit ${ins.friction[1].count} times.` : ''}`
+        : 'remarkably few friction points.'}</p>`;
       const topSuccess = ins.successFactors.length > 0 ? ins.successFactors[0] : null;
-      document.getElementById('oc-step-2').innerHTML = `<p>What made sessions succeed?
+      document.getElementById('oc-step-2').innerHTML = `<p>what made sessions succeed?
         <span class="hl-green">${topSuccess ? topSuccess.name.replace(/_/g,' ') : 'good output'}</span>
         was the #1 success factor${topSuccess ? ` (${topSuccess.count} sessions)` : ''}.
-        Claude was rated <span class="hl">very helpful</span> or <span class="hl">essential</span> in
+        claude was rated <span class="hl">very helpful</span> or <span class="hl">essential</span> in
         ${ins.helpfulness.filter(h => h.name === 'very_helpful' || h.name === 'essential').reduce((s,h) => s+h.count, 0)} of ${ins.totalFacets} sessions.</p>`;
     }
   }
@@ -587,17 +599,17 @@
     const cacheHitPct = cacheTotal > 0 ? Math.round(o.totalCacheRead / cacheTotal * 100) : 0;
 
     document.getElementById('outro').innerHTML = `
-      <h2>The Full Picture</h2>
-      <p class="outro-subtitle">A snapshot of ${o.daySpan} days of building, exploring, and learning with AI</p>
+      <h2>the full picture</h2>
+      <p class="outro-subtitle">a snapshot of ${o.daySpan} days of building, exploring, and learning with ai</p>
       <div class="outro-grid">
-        <div class="outro-card"><div class="val">${fmtNum(o.totalOutputTokens)}</div><div class="lbl">Tokens Generated</div></div>
-        <div class="outro-card"><div class="val">${cacheHitPct}%</div><div class="lbl">Cache Hit Rate</div></div>
-        <div class="outro-card"><div class="val">${ss.maxMessages}</div><div class="lbl">Longest Session (msgs)</div></div>
-        <div class="outro-card"><div class="val">${Math.round(ss.avgMessages)}</div><div class="lbl">Avg Messages / Session</div></div>
-        <div class="outro-card"><div class="val">+${fmtNum(data.insights.linesAdded)}</div><div class="lbl">Lines of Code Added</div></div>
-        <div class="outro-card"><div class="val">${data.insights.languages.length}</div><div class="lbl">Languages Used</div></div>
+        <div class="outro-card"><div class="val">${fmtNum(o.totalOutputTokens)}</div><div class="lbl">tokens generated</div></div>
+        <div class="outro-card"><div class="val">${cacheHitPct}%</div><div class="lbl">cache hit rate</div></div>
+        <div class="outro-card"><div class="val">${ss.maxMessages}</div><div class="lbl">longest session (msgs)</div></div>
+        <div class="outro-card"><div class="val">${Math.round(ss.avgMessages)}</div><div class="lbl">avg messages / session</div></div>
+        <div class="outro-card"><div class="val">+${fmtNum(data.insights.linesAdded)}</div><div class="lbl">lines of code added</div></div>
+        <div class="outro-card"><div class="val">${data.insights.languages.length}</div><div class="lbl">languages used</div></div>
       </div>
-      <p class="outro-note">Generated with Claude Code</p>
+      <p class="outro-note">generated with claude code</p>
     `;
   }
 
@@ -713,7 +725,7 @@
     annG.append('text').attr('class', 'annotation-text')
       .attr('x', x(parseDate(busiest))).attr('y', y(busiest.messages) - 46)
       .attr('text-anchor', 'middle')
-      .text(`Busiest: ${busiest.messages} msgs`);
+      .text(`busiest: ${busiest.messages} msgs`);
 
     let lastStep = -1;
     return function update(step) {
@@ -817,76 +829,137 @@
     };
   }
 
-  /* ─── 3. Tools (Horizontal Bar Chart) ─────────────────── */
+  /* ─── 3. Tools (Terminal Bar Chart) ─────────────────── */
   function createTools(data) {
     const container = document.getElementById('viz-tools');
     const rect = container.getBoundingClientRect();
     const W = rect.width, H = rect.height;
-    const m = { t: 30, r: 60, b: 40, l: 100 };
+    const m = { t: 30, r: 30, b: 40, l: 14 };
     const w = W - m.l - m.r, h = H - m.t - m.b;
 
     const svg = d3.select(container).append('svg')
       .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
 
     const tools = data.tools.slice(0, 8);
+    const maxCount = d3.max(tools, t => t.count);
+    const labelStartX = 115; // prompt + 12-char label
+    const charW = 8.1;
+    const maxBlocks = Math.max(10, Math.floor((w - labelStartX - 60) / charW));
     const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+    const rowH = Math.min(h / tools.length, 36);
 
-    const y = d3.scaleBand().domain(tools.map(t => t.name)).range([0, h]).padding(0.35);
-    const x = d3.scaleLinear().domain([0, d3.max(tools, t => t.count) * 1.1]).range([0, w]);
-
-    // Grid
-    g.append('g').attr('class', 'grid')
-      .call(d3.axisBottom(x).ticks(5).tickSize(h).tickFormat(''))
-      .attr('transform', 'translate(0,0)');
-
-    // Labels
-    g.selectAll('.bar-label').data(tools).join('text')
-      .attr('class', 'bar-label')
-      .attr('x', -12).attr('y', d => y(d.name) + y.bandwidth() / 2)
-      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .text(d => d.name);
-
-    // Bars
-    const bars = g.selectAll('.bar').data(tools).join('rect')
-      .attr('class', 'bar')
-      .attr('x', 0).attr('y', d => y(d.name))
-      .attr('width', 0).attr('height', y.bandwidth())
-      .attr('rx', 4)
-      .attr('fill', (_, i) => COLORS[i % COLORS.length])
-      .attr('opacity', 0.85)
+    const rows = g.selectAll('.term-row').data(tools).join('g')
+      .attr('class', 'term-row')
+      .attr('transform', (_, i) => `translate(0,${i * rowH})`)
+      .style('cursor', 'pointer')
       .on('mousemove', (evt, d) => {
         const projs = d.topProjects.map(p => `${p[0]}: ${p[1]}`).join('<br>');
         showTip(`<strong>${d.name}</strong>: ${d.count} uses<br><br>${projs}`, evt);
       })
       .on('mouseleave', hideTip);
 
-    // Values
-    const vals = g.selectAll('.bar-value').data(tools).join('text')
+    // Prompt symbol
+    rows.append('text')
+      .attr('class', 'bar-prompt')
+      .attr('x', 0).attr('y', rowH * 0.62)
+      .text('>');
+
+    // Tool name (fixed width)
+    rows.append('text')
+      .attr('class', 'bar-label')
+      .attr('x', 18).attr('y', rowH * 0.62)
+      .text(d => d.name.padEnd(12));
+
+    // Block bar (█ characters)
+    const blockTexts = rows.append('text')
+      .attr('class', 'bar-blocks')
+      .attr('x', 115).attr('y', rowH * 0.62)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('font-size', '13px')
+      .attr('opacity', 0.9)
+      .text('');
+
+    // Cursor (blinking block at end of bar)
+    const cursors = rows.append('text')
+      .attr('class', 'term-cursor')
+      .attr('x', 115).attr('y', rowH * 0.62)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('font-size', '13px')
+      .attr('opacity', 0)
+      .text('█');
+
+    // Count value
+    const vals = rows.append('text')
       .attr('class', 'bar-value')
-      .attr('x', 0).attr('y', d => y(d.name) + y.bandwidth() / 2)
-      .attr('dominant-baseline', 'central')
+      .attr('y', rowH * 0.62)
       .attr('opacity', 0)
       .text(d => d.count);
 
+    function getBlocks(count) {
+      const n = Math.max(1, Math.round((count / maxCount) * maxBlocks));
+      return '█'.repeat(n);
+    }
+
+    function getBlockWidth(count) {
+      const n = Math.max(1, Math.round((count / maxCount) * maxBlocks));
+      return n * 8.1; // approximate char width
+    }
+
     let lastStep = -1;
+    let typeTimers = [];
+
+    function clearTimers() {
+      typeTimers.forEach(t => clearTimeout(t));
+      typeTimers = [];
+    }
+
+    function typeBar(textEl, cursorEl, valEl, fullStr, color, delay, charDelay) {
+      const charTime = charDelay || 18;
+      cursorEl.attr('opacity', 1).attr('x', 115);
+      textEl.text('');
+      for (let c = 0; c <= fullStr.length; c++) {
+        typeTimers.push(setTimeout(() => {
+          textEl.text(fullStr.substring(0, c));
+          cursorEl.attr('x', 115 + c * 8.1);
+          if (c === fullStr.length) {
+            cursorEl.attr('opacity', 1);
+            valEl.attr('x', 115 + fullStr.length * 8.1 + 14).attr('opacity', 1);
+          }
+        }, delay + c * charTime));
+      }
+    }
+
     return function update(step) {
       if (step === lastStep) return;
       lastStep = step;
+      clearTimers();
       if (step === 0) {
-        bars.transition().duration(800).delay((_, i) => i * 60)
-          .ease(d3.easeCubicOut)
-          .attr('width', d => x(d.count));
-        vals.transition().duration(400).delay((_, i) => 600 + i * 60)
-          .attr('x', d => x(d.count) + 8).attr('opacity', 1);
-        bars.transition().delay(1000).duration(400).attr('opacity', 0.85);
+        rows.attr('opacity', 1);
+        tools.forEach((d, i) => {
+          const row = d3.select(rows.nodes()[i]);
+          const lineDelay = i * 180;
+          // Fade in the row
+          row.attr('opacity', 0);
+          typeTimers.push(setTimeout(() => row.attr('opacity', 1), lineDelay));
+          typeBar(
+            blockTexts.filter((_, j) => j === i),
+            cursors.filter((_, j) => j === i),
+            vals.filter((_, j) => j === i),
+            getBlocks(d.count), COLORS[i % COLORS.length],
+            lineDelay, 22
+          );
+        });
+        // Stop cursor blinking after all done
+        typeTimers.push(setTimeout(() => {
+          cursors.classed('term-cursor', false).attr('opacity', 0);
+        }, tools.length * 180 + maxBlocks * 22 + 300));
       } else if (step === 1) {
-        bars.transition().duration(500)
-          .attr('opacity', (_, i) => i === 0 ? 0.95 : 0.25);
-        vals.transition().duration(500)
-          .attr('opacity', (_, i) => i === 0 ? 1 : 0.3);
+        cursors.attr('opacity', 0).classed('term-cursor', false);
+        rows.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 1 : 0.15);
       } else if (step === 2) {
-        bars.transition().duration(500).attr('opacity', 0.85);
-        vals.transition().duration(500).attr('opacity', 1);
+        cursors.attr('opacity', 0).classed('term-cursor', false);
+        rows.transition().duration(500).attr('opacity', 1);
       }
     };
   }
@@ -967,7 +1040,7 @@
     };
   }
 
-  /* ─── 5. Goals (Horizontal Bar Chart) ─────────────────── */
+  /* ─── 5. Goals (Terminal Bar Chart) ─────────────────── */
   function createGoals(data) {
     const ins = data.insights;
     if (!ins || !ins.goals || !ins.goals.length) return () => {};
@@ -975,93 +1048,114 @@
     const container = document.getElementById('viz-goals');
     const rect = container.getBoundingClientRect();
     const W = rect.width, H = rect.height;
-    const m = { t: 30, r: 50, b: 40, l: 160 };
-    const w = W - m.l - m.r, h = H - m.t - m.b;
+    const m = { t: 30, r: 30, b: 40, l: 14 };
 
     const svg = d3.select(container).append('svg')
       .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
 
     const goals = ins.goals.slice(0, 10);
-    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
-
-    const y = d3.scaleBand().domain(goals.map(t => t.name)).range([0, h]).padding(0.3);
-    const x = d3.scaleLinear().domain([0, d3.max(goals, t => t.count) * 1.15]).range([0, w]);
-
-    g.append('g').attr('class', 'grid')
-      .call(d3.axisBottom(x).ticks(5).tickSize(h).tickFormat(''));
-
+    const maxGoalCount = d3.max(goals, t => t.count);
+    const goalsW = W - m.l - m.r;
     const fmtName = n => n.replace(/_/g, ' ');
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+    const rowH = Math.min((H - m.t - m.b) / goals.length, 32);
+    const charW = 8.1;
 
-    g.selectAll('.bar-label').data(goals).join('text')
-      .attr('class', 'bar-label')
-      .attr('x', -12).attr('y', d => y(d.name) + y.bandwidth() / 2)
-      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .attr('font-size', '11px')
-      .text(d => fmtName(d.name));
+    function buildTermRows(parent, items, maxVal, colors, labelWidth) {
+      const rows = parent.selectAll('.term-row').data(items).join('g')
+        .attr('class', 'term-row')
+        .attr('transform', (_, i) => `translate(0,${i * rowH})`);
 
-    const bars = g.selectAll('.bar').data(goals).join('rect')
-      .attr('class', 'bar')
-      .attr('x', 0).attr('y', d => y(d.name))
-      .attr('width', 0).attr('height', y.bandwidth())
-      .attr('rx', 4)
-      .attr('fill', (_, i) => COLORS[i % COLORS.length])
-      .attr('opacity', 0.85);
+      rows.append('text').attr('class', 'bar-prompt')
+        .attr('x', 0).attr('y', rowH * 0.62).text('>');
 
-    const vals = g.selectAll('.bar-value').data(goals).join('text')
-      .attr('class', 'bar-value')
-      .attr('x', 0).attr('y', d => y(d.name) + y.bandwidth() / 2)
-      .attr('dominant-baseline', 'central')
-      .attr('opacity', 0)
-      .text(d => d.count);
+      rows.append('text').attr('class', 'bar-label')
+        .attr('x', 18).attr('y', rowH * 0.62)
+        .text(d => fmtName(d.name).substring(0, labelWidth).padEnd(labelWidth));
 
-    // Session type badges (shown in step 2)
+      const bx = 18 + labelWidth * 7.2;
+      const maxBlocks = Math.max(10, Math.floor((goalsW - bx - 60) / charW));
+      const blockTexts = rows.append('text').attr('class', 'bar-blocks')
+        .attr('x', bx).attr('y', rowH * 0.62)
+        .attr('fill', (_, i) => colors[i % colors.length])
+        .attr('font-size', '13px').attr('opacity', 0.9).text('');
+
+      const cursors = rows.append('text').attr('class', 'term-cursor')
+        .attr('x', bx).attr('y', rowH * 0.62)
+        .attr('fill', (_, i) => colors[i % colors.length])
+        .attr('font-size', '13px').attr('opacity', 0).text('█');
+
+      const vals = rows.append('text').attr('class', 'bar-value')
+        .attr('y', rowH * 0.62).attr('opacity', 0)
+        .text(d => d.count);
+
+      return { rows, blockTexts, cursors, vals, bx,
+        getBlocks: c => '█'.repeat(Math.max(1, Math.round((c / maxVal) * maxBlocks)))
+      };
+    }
+
+    const goalsChart = buildTermRows(g, goals, maxGoalCount, COLORS, 22);
+
+    // Session types (shown in step 2)
     const stG = svg.append('g').attr('transform', `translate(${m.l},${m.t})`).attr('opacity', 0);
     const sessionTypes = ins.sessionTypes;
-    const stY = d3.scaleBand().domain(sessionTypes.map(s => s.name)).range([0, h]).padding(0.3);
-    const stX = d3.scaleLinear().domain([0, d3.max(sessionTypes, s => s.count) * 1.15]).range([0, w]);
-
-    stG.selectAll('.st-label').data(sessionTypes).join('text')
-      .attr('class', 'bar-label')
-      .attr('x', -12).attr('y', d => stY(d.name) + stY.bandwidth() / 2)
-      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .attr('font-size', '11px')
-      .text(d => fmtName(d.name));
-
-    stG.selectAll('.st-bar').data(sessionTypes).join('rect')
-      .attr('x', 0).attr('y', d => stY(d.name))
-      .attr('width', d => stX(d.count)).attr('height', stY.bandwidth())
-      .attr('rx', 4)
-      .attr('fill', (_, i) => ['#7dcfff','#9ece6a','#e0af68','#f7768e','#e8855a'][i % 5])
-      .attr('opacity', 0.85);
-
-    stG.selectAll('.st-val').data(sessionTypes).join('text')
-      .attr('class', 'bar-value')
-      .attr('x', d => stX(d.count) + 8).attr('y', d => stY(d.name) + stY.bandwidth() / 2)
-      .attr('dominant-baseline', 'central')
-      .text(d => d.count);
+    const stColors = ['#7dcfff','#9ece6a','#e0af68','#f7768e','#e8855a'];
+    const stChart = buildTermRows(stG, sessionTypes, d3.max(sessionTypes, s => s.count), stColors, 22);
 
     let lastStep = -1;
+    let typeTimers = [];
+    function clearTimers() { typeTimers.forEach(t => clearTimeout(t)); typeTimers = []; }
+
+    function typeTermRows(chart, items, colors, onDone) {
+      items.forEach((d, i) => {
+        const lineDelay = i * 160;
+        const row = d3.select(chart.rows.nodes()[i]);
+        row.attr('opacity', 0);
+        typeTimers.push(setTimeout(() => row.attr('opacity', 1), lineDelay));
+        const fullStr = chart.getBlocks(d.count);
+        const bt = chart.blockTexts.filter((_, j) => j === i);
+        const cu = chart.cursors.filter((_, j) => j === i);
+        const vl = chart.vals.filter((_, j) => j === i);
+        bt.text(''); cu.attr('opacity', 1).attr('x', chart.bx); vl.attr('opacity', 0);
+        for (let c = 0; c <= fullStr.length; c++) {
+          typeTimers.push(setTimeout(() => {
+            bt.text(fullStr.substring(0, c));
+            cu.attr('x', chart.bx + c * 8.1);
+            if (c === fullStr.length) {
+              vl.attr('x', chart.bx + fullStr.length * 8.1 + 14).attr('opacity', 1);
+            }
+          }, lineDelay + c * 20));
+        }
+      });
+      const total = items.length * 160 + 20 * 20 + 300;
+      typeTimers.push(setTimeout(() => {
+        chart.cursors.classed('term-cursor', false).attr('opacity', 0);
+        if (onDone) onDone();
+      }, total));
+    }
+
     return function update(step) {
       if (step === lastStep) return;
       lastStep = step;
+      clearTimers();
       if (step === 0) {
         g.attr('opacity', 1);
         stG.transition().duration(400).attr('opacity', 0);
-        bars.transition().duration(800).delay((_, i) => i * 50)
-          .ease(d3.easeCubicOut).attr('width', d => x(d.count));
-        vals.transition().duration(400).delay((_, i) => 500 + i * 50)
-          .attr('x', d => x(d.count) + 8).attr('opacity', 1);
-        bars.transition().delay(900).duration(400).attr('opacity', 0.85);
+        goalsChart.cursors.classed('term-cursor', true);
+        typeTermRows(goalsChart, goals, COLORS);
       } else if (step === 1) {
         g.attr('opacity', 1);
         stG.transition().duration(400).attr('opacity', 0);
-        bars.transition().duration(500)
-          .attr('opacity', (_, i) => i === 0 ? 0.95 : 0.25);
-        vals.transition().duration(500)
-          .attr('opacity', (_, i) => i === 0 ? 1 : 0.3);
+        goalsChart.cursors.attr('opacity', 0).classed('term-cursor', false);
+        goalsChart.rows.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 1 : 0.15);
       } else if (step === 2) {
         g.transition().duration(400).attr('opacity', 0);
-        stG.transition().delay(300).duration(600).attr('opacity', 1);
+        stChart.cursors.classed('term-cursor', true);
+        stG.transition().delay(300).duration(400).attr('opacity', 1);
+        typeTimers.push(setTimeout(() => {
+          typeTermRows(stChart, sessionTypes, stColors);
+        }, 500));
       }
     };
   }
@@ -1135,39 +1229,51 @@
         .text(`${o.name.replace(/_/g, ' ')} (${o.count})`);
     });
 
-    // ── Friction bars (shown in step 1) ──
+    // ── Friction bars (terminal style, shown in step 1) ──
     const frictionG = svg.append('g')
       .attr('transform', `translate(${W * 0.15},${H * 0.15})`).attr('opacity', 0);
 
     const frictionData = ins.friction;
-    const fH = H * 0.7;
-    const fW = W * 0.7;
-    const fY = d3.scaleBand().domain(frictionData.map(f => f.name)).range([0, fH]).padding(0.35);
-    const fX = d3.scaleLinear().domain([0, d3.max(frictionData, f => f.count) * 1.2]).range([0, fW]);
+    const fRowH = Math.min((H * 0.7) / Math.max(frictionData.length, 1), 32);
+    const maxFriction = d3.max(frictionData, f => f.count) || 1;
+    const fColors = ['#f7768e','#e0af68','#e0af68','#f7768e','#bb9af7'];
+    const fLabelW = 22;
+    const fCharW = 8.1;
+    const fAvailW = W * 0.7;
+    const fBxStart = 18 + fLabelW * 7.2;
+    const fMaxBlocks = Math.max(10, Math.floor((fAvailW - fBxStart - 60) / fCharW));
 
     frictionG.append('text').attr('class', 'chart-title')
-      .attr('y', -15).text('Friction Points');
+      .attr('y', -15).text('friction points');
 
-    const frictionColors = { wrong_approach: '#f7768e', buggy_code: '#e0af68', tool_error: '#e0af68', misunderstood_request: '#f7768e' };
+    const fRows = frictionG.selectAll('.term-row').data(frictionData).join('g')
+      .attr('class', 'term-row')
+      .attr('transform', (_, i) => `translate(0,${i * fRowH + 10})`);
 
-    frictionG.selectAll('.f-label').data(frictionData).join('text')
-      .attr('class', 'bar-label')
-      .attr('x', -12).attr('y', d => fY(d.name) + fY.bandwidth() / 2)
-      .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .text(d => d.name.replace(/_/g, ' '));
+    fRows.append('text').attr('class', 'bar-prompt')
+      .attr('x', 0).attr('y', fRowH * 0.62).text('>');
+    fRows.append('text').attr('class', 'bar-label')
+      .attr('x', 18).attr('y', fRowH * 0.62)
+      .text(d => d.name.replace(/_/g, ' ').substring(0, fLabelW).padEnd(fLabelW));
 
-    frictionG.selectAll('.f-bar').data(frictionData).join('rect')
-      .attr('x', 0).attr('y', d => fY(d.name))
-      .attr('width', d => fX(d.count)).attr('height', fY.bandwidth())
-      .attr('rx', 4)
-      .attr('fill', d => frictionColors[d.name] || '#f7768e')
-      .attr('opacity', 0.85);
+    const fBx = 18 + fLabelW * 7.2;
+    const fBlockTexts = fRows.append('text').attr('class', 'bar-blocks')
+      .attr('x', fBx).attr('y', fRowH * 0.62)
+      .attr('fill', (_, i) => fColors[i % fColors.length])
+      .attr('font-size', '13px').attr('opacity', 0.9).text('');
 
-    frictionG.selectAll('.f-val').data(frictionData).join('text')
-      .attr('class', 'bar-value')
-      .attr('x', d => fX(d.count) + 8).attr('y', d => fY(d.name) + fY.bandwidth() / 2)
-      .attr('dominant-baseline', 'central')
+    const fCursors = fRows.append('text').attr('class', 'term-cursor')
+      .attr('x', fBx).attr('y', fRowH * 0.62)
+      .attr('fill', (_, i) => fColors[i % fColors.length])
+      .attr('font-size', '13px').attr('opacity', 0).text('█');
+
+    const fVals = fRows.append('text').attr('class', 'bar-value')
+      .attr('y', fRowH * 0.62).attr('opacity', 0)
       .text(d => d.count);
+
+    const frictionChart = { rows: fRows, blockTexts: fBlockTexts, cursors: fCursors, vals: fVals, bx: fBx,
+      getBlocks: c => '█'.repeat(Math.max(1, Math.round((c / maxFriction) * fMaxBlocks)))
+    };
 
     // ── Helpfulness donut (shown in step 2) ──
     const helpG = svg.append('g').attr('transform', `translate(${cx},${cy})`).attr('opacity', 0);
@@ -1191,7 +1297,7 @@
       .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
       .attr('fill', '#c0caf5').attr('font-weight', 700).attr('font-size', '1.2rem')
       .attr('font-family', 'JetBrains Mono, monospace')
-      .text('Helpfulness');
+      .text('helpfulness');
     const helpLegendG = helpG.append('g').attr('transform', `translate(${radius + 30},${-radius + 10})`);
     ins.helpfulness.forEach((h, i) => {
       const row = helpLegendG.append('g').attr('transform', `translate(0,${i * 24})`);
@@ -1206,9 +1312,40 @@
     const achievedPct = Math.round(achieved.reduce((s,o) => s+o.count, 0) / ins.totalFacets * 100);
 
     let lastStep = -1;
+    let fTypeTimers = [];
+    function clearFTimers() { fTypeTimers.forEach(t => clearTimeout(t)); fTypeTimers = []; }
+
+    function typeFrictionRows() {
+      frictionData.forEach((d, i) => {
+        const lineDelay = i * 160;
+        const row = d3.select(frictionChart.rows.nodes()[i]);
+        row.attr('opacity', 0);
+        fTypeTimers.push(setTimeout(() => row.attr('opacity', 1), lineDelay));
+        const fullStr = frictionChart.getBlocks(d.count);
+        const bt = frictionChart.blockTexts.filter((_, j) => j === i);
+        const cu = frictionChart.cursors.filter((_, j) => j === i);
+        const vl = frictionChart.vals.filter((_, j) => j === i);
+        bt.text(''); cu.attr('opacity', 1).attr('x', frictionChart.bx); vl.attr('opacity', 0);
+        for (let c = 0; c <= fullStr.length; c++) {
+          fTypeTimers.push(setTimeout(() => {
+            bt.text(fullStr.substring(0, c));
+            cu.attr('x', frictionChart.bx + c * 8.1);
+            if (c === fullStr.length) {
+              vl.attr('x', frictionChart.bx + fullStr.length * 8.1 + 14).attr('opacity', 1);
+            }
+          }, lineDelay + c * 20));
+        }
+      });
+      const total = frictionData.length * 160 + 20 * 20 + 300;
+      fTypeTimers.push(setTimeout(() => {
+        frictionChart.cursors.classed('term-cursor', false).attr('opacity', 0);
+      }, total));
+    }
+
     return function update(step) {
       if (step === lastStep) return;
       lastStep = step;
+      clearFTimers();
       if (step === 0) {
         donutG.transition().duration(400).attr('opacity', 1);
         frictionG.transition().duration(400).attr('opacity', 0);
@@ -1222,10 +1359,13 @@
       } else if (step === 1) {
         donutG.transition().duration(400).attr('opacity', 0);
         helpG.transition().duration(400).attr('opacity', 0);
-        frictionG.transition().delay(300).duration(600).attr('opacity', 1);
+        frictionChart.cursors.classed('term-cursor', true);
+        frictionG.transition().delay(300).duration(400).attr('opacity', 1);
+        fTypeTimers.push(setTimeout(() => typeFrictionRows(), 500));
       } else if (step === 2) {
         donutG.transition().duration(400).attr('opacity', 0);
         frictionG.transition().duration(400).attr('opacity', 0);
+        frictionChart.cursors.attr('opacity', 0).classed('term-cursor', false);
         helpG.transition().delay(300).duration(600).attr('opacity', 1);
       }
     };
