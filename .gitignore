@@ -21,6 +21,11 @@ Thumbs.db
 *.swp
 *.swo
 
+# Build / dist
+dist/
+build/
+*.egg-info/
+
 # Env
 .env
 .env.*
