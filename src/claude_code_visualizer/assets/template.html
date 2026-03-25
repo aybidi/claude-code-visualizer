@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Claude Code Story</title>
+  <style>
+    :root {
+      --bg: #1a1b26;
+      --bg-dark: #16161e;
+      --bg-darker: #0f0f14;
+      --bg-current: #292e42;
+      --text: #c0caf5;
+      --text-muted: #565f89;
+      --text-light: #565f89;
+      --border: #292e42;
+      --accent: #e8855a;
+      --accent-light: #f0a878;
+      --accent-glow: rgba(232,133,90,0.15);
+      --cyan: #7dcfff;
+      --green: #9ece6a;
+      --orange: #e0af68;
+      --pink: #f7768e;
+      --purple: #bb9af7;
+      --red: #f7768e;
+      --yellow: #e0af68;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      text-transform: lowercase;
+    }
+    .preserve-case, .preserve-case * { text-transform: none; }
+
+    /* ─── Loading ─────────────────────────────────────────── */
+    .loading-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg-darker);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); font-size: 1.1rem; font-weight: 300;
+      transition: opacity 0.6s, visibility 0.6s;
+    }
+    body.loaded .loading-screen { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* ─── Hero ────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--bg-darker) 0%, #1a1b26 50%, #1e2030 100%);
+      color: white;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 40%, rgba(232,133,90,0.08) 0%, transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(125,207,255,0.05) 0%, transparent 50%);
+    }
+    .hero > * { position: relative; z-index: 1; }
+    .hero-label {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: lowercase;
+      color: var(--accent); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.03em; margin-bottom: 0.75rem;
+    }
+    .hero-subtitle {
+      font-size: 0.95rem; color: rgba(192,202,245,0.5);
+      font-weight: 300; margin-bottom: 3rem;
+    }
+    .hero-stats {
+      display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card { text-align: center; }
+    .stat-value {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700; font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, #e8855a, #f0a878, #e0af68);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 0.8rem; font-weight: 500;
+      color: rgba(255,255,255,0.45); text-transform: lowercase;
+      letter-spacing: 0.12em; margin-top: 0.25rem;
+    }
+    .hero-meta {
+      display: flex; gap: 1.5rem; align-items: center;
+      font-size: 0.85rem; color: rgba(255,255,255,0.4);
+      margin-bottom: 4rem;
+    }
+    .hero-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,0.25); }
+    .scroll-hint {
+      position: absolute; bottom: 2.5rem;
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: lowercase;
+      color: rgba(255,255,255,0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+    /* ─── Section Intros ──────────────────────────────────── */
+    .section-intro {
+      min-height: 40vh; padding: 6rem 2rem;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .section-intro.visible { opacity: 1; transform: translateY(0); }
+    .section-num {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.2em;
+    }
+    .section-intro h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700; margin: 0.5rem 0 0.25rem;
+      letter-spacing: -0.02em;
+    }
+    .section-intro p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* ─── Scrollytelling ──────────────────────────────────── */
+    .scroll-section {
+      display: flex; position: relative;
+    }
+    .scroll-text {
+      flex: 0 0 36%; padding: 0 2rem 0 3rem;
+      z-index: 2;
+    }
+    .scroll-graphic {
+      flex: 1; position: sticky;
+      top: 0; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem 3rem 2rem 1rem;
+    }
+    .graphic-container {
+      width: 100%; height: 80%;
+      position: relative;
+    }
+    .graphic-container svg { display: block; }
+
+    .step {
+      min-height: 70vh;
+      display: flex; align-items: center;
+      padding: 2rem 0;
+      opacity: 0.1;
+      transition: opacity 0.6s ease;
+    }
+    .step:first-child { padding-top: 35vh; }
+    .step:last-child { padding-bottom: 50vh; }
+    .step.active { opacity: 1; }
+    .step p {
+      font-size: 0.95rem; line-height: 1.85;
+      color: var(--text); max-width: 340px;
+    }
+    .hl {
+      color: var(--accent); font-weight: 600;
+    }
+    .hl-pink { color: var(--pink); font-weight: 600; }
+    .hl-green { color: var(--green); font-weight: 600; }
+    .hl-amber { color: var(--orange); font-weight: 600; }
+
+    /* ─── Tooltip ─────────────────────────────────────────── */
+    .tooltip {
+      position: fixed; z-index: 1000;
+      background: var(--bg-darker); color: var(--text);
+      border: 1px solid var(--bg-current);
+      padding: 0.5rem 0.75rem; border-radius: 8px;
+      font-size: 0.78rem; line-height: 1.5;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.12s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      max-width: 220px;
+    }
+    .tooltip.visible { opacity: 1; }
+
+    /* ─── Outro ───────────────────────────────────────────── */
+    .outro {
+      min-height: 80vh;
+      background: linear-gradient(160deg, var(--bg-darker) 0%, #1a1b26 100%);
+      color: white; padding: 6rem 2rem;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .outro h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700; margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .outro-subtitle {
+      color: rgba(192,202,245,0.5); font-size: 0.9rem;
+      margin-bottom: 3rem; max-width: 480px;
+    }
+    .outro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem; max-width: 700px; width: 100%;
+      margin-bottom: 3rem;
+    }
+    .outro-card {
+      background: rgba(41,46,66,0.6);
+      border: 1px solid rgba(86,95,137,0.3);
+      border-radius: 12px; padding: 1.5rem;
+    }
+    .outro-card .val {
+      font-size: 1.6rem; font-weight: 700;
+      color: var(--cyan);
+    }
+    .outro-card .lbl {
+      font-size: 0.78rem; color: rgba(255,255,255,0.4);
+      text-transform: lowercase; letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+    }
+    .outro-note {
+      font-size: 0.8rem; color: rgba(255,255,255,0.25);
+      margin-top: 2rem;
+    }
+
+    /* ─── Chart Styles ────────────────────────────────────── */
+    .axis line, .axis path { stroke: var(--bg-current); }
+    .axis text { fill: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .grid line { stroke: var(--bg-current); stroke-opacity: 0.4; stroke-dasharray: 2,3; }
+    .grid path { display: none; }
+    .chart-title {
+      font-size: 13px; font-weight: 600; fill: var(--text);
+    }
+    .annotation-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3,3; }
+    .annotation-text { font-size: 11px; fill: var(--cyan); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-label { font-size: 11px; fill: var(--text-muted); font-weight: 400; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-value { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-prompt { font-size: 11px; fill: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+    .bar-blocks { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 1.5px; }
+    .term-cursor {
+      animation: blink-cursor 1s step-end infinite;
+    }
+    @keyframes blink-cursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .heatmap-label { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+
+    /* ─── Responsive ──────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .scroll-section { flex-direction: column-reverse; }
+      .scroll-text { flex: none; padding: 0 1.5rem; }
+      .scroll-graphic {
+        position: relative; height: 60vh;
+        padding: 1.5rem;
+      }
+      .step { min-height: 50vh; }
+      .step:first-child { padding-top: 2rem; }
+      .hero-stats { gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading -->
+  <div class="loading-screen">Loading your data...</div>
+
+  <!-- Tooltip -->
+  <div class="tooltip preserve-case" id="tooltip"></div>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero">
+    <div class="hero-label">claude code analytics</div>
+    <h1>your claude code story</h1>
+    <p class="hero-subtitle" id="hero-subtitle"></p>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-sessions">0</div>
+        <div class="stat-label">sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-messages">0</div>
+        <div class="stat-label">messages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-tokens">0</div>
+        <div class="stat-label">total tokens</div>
+      </div>
+    </div>
+    <div class="hero-meta" id="hero-meta"></div>
+    <div class="scroll-hint">scroll to explore</div>
+  </section>
+
+  <!-- ═══ Section 1: Timeline ═══ -->
+  <div class="section-intro">
+    <span class="section-num">01</span>
+    <h2>the timeline</h2>
+    <p>your activity day by day</p>
+  </div>
+  <section class="scroll-section" id="sec-timeline">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="tl-step-0"></div>
+      <div class="step" data-step="1" id="tl-step-1"></div>
+      <div class="step" data-step="2" id="tl-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-timeline"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 2: Projects ═══ -->
+  <div class="section-intro">
+    <span class="section-num">02</span>
+    <h2>your projects</h2>
+    <p>what you've been building</p>
+  </div>
+  <section class="scroll-section" id="sec-projects">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="pj-step-0"></div>
+      <div class="step" data-step="1" id="pj-step-1"></div>
+      <div class="step" data-step="2" id="pj-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-projects"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 3: Tools ═══ -->
+  <div class="section-intro">
+    <span class="section-num">03</span>
+    <h2>the tool belt</h2>
+    <p>how claude helped you code</p>
+  </div>
+  <section class="scroll-section" id="sec-tools">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="tl2-step-0"></div>
+      <div class="step" data-step="1" id="tl2-step-1"></div>
+      <div class="step" data-step="2" id="tl2-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-tools"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 4: Rhythm ═══ -->
+  <div class="section-intro">
+    <span class="section-num">04</span>
+    <h2>your rhythm</h2>
+    <p>when the magic happens</p>
+  </div>
+  <section class="scroll-section" id="sec-rhythm">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="rh-step-0"></div>
+      <div class="step" data-step="1" id="rh-step-1"></div>
+      <div class="step" data-step="2" id="rh-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-rhythm"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 5: Goals & Intentions ═══ -->
+  <div class="section-intro">
+    <span class="section-num">05</span>
+    <h2>your intentions</h2>
+    <p>what you were trying to accomplish</p>
+  </div>
+  <section class="scroll-section" id="sec-goals">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="gl-step-0"></div>
+      <div class="step" data-step="1" id="gl-step-1"></div>
+      <div class="step" data-step="2" id="gl-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-goals"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Section 6: Outcomes & Quality ═══ -->
+  <div class="section-intro">
+    <span class="section-num">06</span>
+    <h2>how it went</h2>
+    <p>outcomes, friction, and what worked</p>
+  </div>
+  <section class="scroll-section" id="sec-outcomes">
+    <div class="scroll-text">
+      <div class="step" data-step="0" id="oc-step-0"></div>
+      <div class="step" data-step="1" id="oc-step-1"></div>
+      <div class="step" data-step="2" id="oc-step-2"></div>
+    </div>
+    <div class="scroll-graphic">
+      <div class="graphic-container" id="viz-outcomes"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Outro ═══ -->
+  <section class="outro" id="outro"></section>
+
+  <!-- D3_INLINE_SCRIPT -->
+  <script>
+  /* ═══════════════════════════════════════════════════════════
+     Constants & Helpers
+     ═══════════════════════════════════════════════════════════ */
+  const COLORS = ['#e8855a','#7dcfff','#9ece6a','#e0af68','#bb9af7','#f7768e','#73daca','#ff9e64','#2ac3de','#b4f9f8'];
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  }
+  function fmtNum(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + 'K';
+    return n.toLocaleString();
+  }
+  function fmtFull(n) { return n.toLocaleString(); }
+
+  const tooltip = document.getElementById('tooltip');
+  function showTip(html, evt) {
+    tooltip.innerHTML = html;
+    tooltip.classList.add('visible');
+    tooltip.style.left = (evt.clientX + 14) + 'px';
+    tooltip.style.top = (evt.clientY - 14) + 'px';
+  }
+  function hideTip() { tooltip.classList.remove('visible'); }
+
+  function animateValue(el, target, duration = 1800, formatter = fmtFull) {
+    const start = performance.now();
+    (function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      el.textContent = formatter(Math.round(target * ease));
+      if (t < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Initialization
+     ═══════════════════════════════════════════════════════════ */
+  const __CLAUDE_VIZ_DATA__ = null; // DATA_MARKER
+  (function(data) {
+    document.body.classList.add('loaded');
+    initHero(data);
+    populateNarrative(data);
+    populateOutro(data);
+    const updaters = {
+      timeline: createTimeline(data),
+      projects: createProjects(data),
+      tools:    createTools(data),
+      rhythm:   createRhythm(data),
+      goals:    createGoals(data),
+      outcomes: createOutcomes(data),
+    };
+    setupScroll(updaters);
+    observeIntros();
+  })(__CLAUDE_VIZ_DATA__);
+
+  /* ─── Hero ────────────────────────────────────────────── */
+  function initHero(data) {
+    const o = data.overview;
+    document.getElementById('hero-subtitle').textContent =
+      `${o.daySpan} days of ai-assisted coding`;
+
+    setTimeout(() => {
+      animateValue(document.getElementById('stat-sessions'), o.totalSessions, 1200);
+      animateValue(document.getElementById('stat-messages'), o.totalMessages, 1600);
+      animateValue(document.getElementById('stat-tokens'), o.totalTokens, 2000, fmtNum);
+    }, 400);
+
+    const opus = data.models.find(m => m.name.includes('opus'));
+    const sonnet = data.models.find(m => m.name.includes('sonnet'));
+    const meta = document.getElementById('hero-meta');
+    meta.innerHTML = `
+      <span>${fmtDate(o.firstDate)} – ${fmtDate(o.lastDate)}, ${new Date(o.lastDate).getUTCFullYear()}</span>
+      <span class="dot"></span>
+      <span>${data.projects.length} projects</span>
+      <span class="dot"></span>
+      <span>${opus ? fmtFull(opus.count) : '—'} opus + ${sonnet ? fmtFull(sonnet.count) : '—'} sonnet responses</span>
+    `;
+  }
+
+  /* ─── Narrative Text ──────────────────────────────────── */
+  function populateNarrative(data) {
+    const tl = data.timeline;
+    const busiest = tl.reduce((a, b) => a.messages > b.messages ? a : b);
+    const second = tl.filter(d => d.date !== busiest.date).reduce((a, b) => a.messages > b.messages ? a : b);
+    const totalDays = tl.length;
+
+    const firstDay = tl[0];
+    const firstTwoMsgs = tl.slice(0, 2).reduce((s, d) => s + d.messages, 0);
+    document.getElementById('tl-step-0').innerHTML = `<p>it started on <span class="hl">${fmtDate(data.overview.firstDate)}</span>.
+      that first day, you sent <span class="hl">${fmtFull(firstDay.messages)} messages</span> across
+      <span class="hl">${firstDay.sessions} session${firstDay.sessions > 1 ? 's' : ''}</span>. something clicked.</p>`;
+    document.getElementById('tl-step-1').innerHTML = `<p>your busiest day was <span class="hl">${fmtDate(busiest.date)}</span>
+      with <span class="hl">${fmtFull(busiest.messages)} messages</span> across ${busiest.sessions} sessions.
+      ${second.messages > busiest.messages * 0.8
+        ? `<span class="hl">${fmtDate(second.date)}</span> came close with ${fmtFull(second.messages)}.`
+        : `that's ${Math.round(busiest.messages / (data.overview.totalMessages / totalDays))}x your daily average.`}</p>`;
+    document.getElementById('tl-step-2').innerHTML = `<p>over ${data.overview.daySpan} days, a rhythm emerged.
+      <span class="hl">${totalDays} active days</span> of focused work,
+      with ${data.overview.daySpan - totalDays} quiet days in between — ${totalDays > data.overview.daySpan * 0.6 ? 'a steady cadence.' : 'intense bursts followed by rest.'}</p>`;
+
+    const pj = data.projects;
+    const top = pj[0];
+    const topPct = Math.round(top.messages / data.overview.totalMessages * 100);
+    document.getElementById('pj-step-0').innerHTML = `<p>you explored
+      <span class="hl">${pj.length} distinct projects</span>.
+      each bubble represents one project, sized by how much you and claude talked about it.</p>`;
+    document.getElementById('pj-step-1').innerHTML = `<p><span class="hl">${top.name}</span> leads the pack
+      with <span class="hl">${fmtFull(top.messages)} messages</span> across ${top.sessions} sessions —
+      ${topPct}% of all your conversations.</p>`;
+    document.getElementById('pj-step-2').innerHTML = `<p>${pj.length > 3
+      ? `<span class="hl-pink">${pj[1].name}</span> (${fmtFull(pj[1].messages)}), <span class="hl-green">${pj[2].name}</span> (${fmtFull(pj[2].messages)}), and <span class="hl-amber">${pj[3].name}</span> (${fmtFull(pj[3].messages)}) round out the top four${pj[1].messages - pj[3].messages < pj[1].messages * 0.3 ? ' — tightly clustered, showing broad curiosity.' : '.'}`
+      : 'your projects span a diverse range of work.'}</p>`;
+
+    const tools = data.tools;
+    const totalTools = tools.reduce((s, t) => s + t.count, 0);
+    document.getElementById('tl2-step-0').innerHTML = `<p>behind every conversation, claude used tools —
+      <span class="hl">${fmtFull(totalTools)} invocations</span> across
+      <span class="hl">${tools.length} different tools</span>.</p>`;
+    const toolPct = Math.round(tools[0].count / totalTools * 100);
+    document.getElementById('tl2-step-1').innerHTML = `<p><span class="hl preserve-case">${tools[0].name}</span> dominated
+      with <span class="hl">${fmtFull(tools[0].count)} uses</span> — ${toolPct}% of all tool calls.</p>`;
+    document.getElementById('tl2-step-2').innerHTML = `<p><span class="hl-pink preserve-case">${tools[1].name}</span>
+      comes next at ${fmtFull(tools[1].count)}${tools.length > 3 ? `, followed by
+      <span class="hl-green preserve-case">${tools[2].name}</span> (${fmtFull(tools[2].count)}) and <span class="hl-amber preserve-case">${tools[3].name}</span> (${fmtFull(tools[3].count)})` : ''}.
+      ${tools[0].name === 'Read' ? 'read first, act second — a deliberate workflow.' :
+        tools[0].name === 'Edit' ? 'editing was the primary mode — hands-on from the start.' :
+        tools[0].name === 'Bash' ? 'command-line heavy — claude spent most of its time executing.' :
+        'a clear preference in how claude works with you.'}</p>`;
+
+
+    const weekendCount = data.weekly[5].count + data.weekly[6].count;
+    const weekdayCount = data.overview.totalMessages - weekendCount;
+    const weekendPct = Math.round(weekendCount / data.overview.totalMessages * 100);
+    const peakHour = data.hourly.reduce((a, b) => a.count > b.count ? a : b);
+    const peakDay = data.weekly.reduce((a, b) => a.count > b.count ? a : b);
+    const isWeekendHeavy = weekendPct > 35;
+    const isEvenSplit = weekendPct >= 25 && weekendPct <= 35;
+    const timeOfDay = peakHour.hour < 6 ? 'night owl' : peakHour.hour < 12 ? 'morning' : peakHour.hour < 17 ? 'afternoon' : peakHour.hour < 21 ? 'evening' : 'late night';
+    document.getElementById('rh-step-0').innerHTML = `<p>when do you code with claude? this heatmap maps
+      your activity by <span class="hl">day of week</span> and <span class="hl">hour</span> (utc).</p>`;
+    document.getElementById('rh-step-1').innerHTML = `<p>${isWeekendHeavy
+      ? `you're a <span class="hl">weekend warrior</span> — saturday and sunday account for <span class="hl">${weekendPct}%</span> of all messages.`
+      : isEvenSplit
+        ? `your activity is <span class="hl">evenly spread</span> across the week — weekends make up <span class="hl">${weekendPct}%</span>, weekdays the rest.`
+        : `you're a <span class="hl">weekday coder</span> — ${100 - weekendPct}% of your messages happen monday through friday.`}</p>`;
+    document.getElementById('rh-step-2').innerHTML = `<p>peak hour: <span class="hl">${peakHour.hour}:00 utc</span>
+      with ${fmtFull(peakHour.count)} messages — you're an <span class="hl">${timeOfDay}</span> coder.
+      <span class="hl">${DAYS[peakDay.day]}</span> is your most active day overall.</p>`;
+
+    // ── Goals section ──
+    const ins = data.insights;
+    if (ins && ins.goals && ins.goals.length) {
+      const topGoal = ins.goals[0];
+      const fmtGoalName = n => n.replace(/_/g, ' ');
+      document.getElementById('gl-step-0').innerHTML = `<p>across ${ins.totalFacets} analyzed sessions, claude identified
+        <span class="hl">${ins.goals.length} distinct goal types</span> in your usage.
+        each bubble shows what you were trying to accomplish.</p>`;
+      document.getElementById('gl-step-1').innerHTML = `<p><span class="hl">${fmtGoalName(topGoal.name)}</span> was
+        your top goal with <span class="hl">${topGoal.count} sessions</span>.
+        ${ins.goals.length > 2 ? `<span class="hl-pink">${fmtGoalName(ins.goals[1].name)}</span> and
+        <span class="hl-green">${fmtGoalName(ins.goals[2].name)}</span> round out the top three.` : ''}</p>`;
+      const stTop = ins.sessionTypes[0];
+      const stPct = Math.round(stTop.count / ins.totalFacets * 100);
+      document.getElementById('gl-step-2').innerHTML = `<p>your most common session type is
+        <span class="hl">${fmtGoalName(stTop.name)}</span> — ${stPct}% of sessions (${stTop.count} total).
+        ${ins.sessionTypes.length > 2 ? `<span class="hl-amber">${fmtGoalName(ins.sessionTypes[1].name)}</span> and <span class="hl-pink">${fmtGoalName(ins.sessionTypes[2].name)}</span> follow.` : ''}</p>`;
+    }
+
+    // ── Outcomes section ──
+    if (ins && ins.outcomes && ins.outcomes.length) {
+      const achieved = ins.outcomes.filter(o => o.name === 'fully_achieved' || o.name === 'mostly_achieved');
+      const achievedPct = Math.round(achieved.reduce((s,o) => s+o.count, 0) / ins.totalFacets * 100);
+      document.getElementById('oc-step-0').innerHTML = `<p>how did your sessions go?
+        <span class="hl">${achievedPct}% of sessions</span> were fully or mostly achieved.
+        the donut shows the outcome breakdown.</p>`;
+      const topFriction = ins.friction.length > 0 ? ins.friction[0] : null;
+      document.getElementById('oc-step-1').innerHTML = `<p>${topFriction
+        ? `the most common friction point was <span class="hl-pink">${topFriction.name.replace(/_/g,' ')}</span> (${topFriction.count} times). ${ins.friction.length > 1 ? `<span class="hl-amber">${ins.friction[1].name.replace(/_/g,' ')}</span> hit ${ins.friction[1].count} times.` : ''}`
+        : 'remarkably few friction points.'}</p>`;
+      const topSuccess = ins.successFactors.length > 0 ? ins.successFactors[0] : null;
+      document.getElementById('oc-step-2').innerHTML = `<p>what made sessions succeed?
+        <span class="hl-green">${topSuccess ? topSuccess.name.replace(/_/g,' ') : 'good output'}</span>
+        was the #1 success factor${topSuccess ? ` (${topSuccess.count} sessions)` : ''}.
+        claude was rated <span class="hl">very helpful</span> or <span class="hl">essential</span> in
+        ${ins.helpfulness.filter(h => h.name === 'very_helpful' || h.name === 'essential').reduce((s,h) => s+h.count, 0)} of ${ins.totalFacets} sessions.</p>`;
+    }
+  }
+
+  /* ─── Outro ───────────────────────────────────────────── */
+  function populateOutro(data) {
+    const o = data.overview;
+    const ss = data.sessionStats;
+    const cacheTotal = o.totalCacheRead + o.totalCacheWrite;
+    const cacheHitPct = cacheTotal > 0 ? Math.round(o.totalCacheRead / cacheTotal * 100) : 0;
+
+    document.getElementById('outro').innerHTML = `
+      <h2>the full picture</h2>
+      <p class="outro-subtitle">a snapshot of ${o.daySpan} days of building, exploring, and learning with ai</p>
+      <div class="outro-grid">
+        <div class="outro-card"><div class="val">${fmtNum(o.totalOutputTokens)}</div><div class="lbl">output tokens</div></div>
+        <div class="outro-card"><div class="val">${cacheHitPct}%</div><div class="lbl">cache hit rate</div></div>
+        <div class="outro-card"><div class="val">${ss.maxMessages}</div><div class="lbl">longest session (msgs)</div></div>
+        <div class="outro-card"><div class="val">${Math.round(ss.avgMessages)}</div><div class="lbl">avg messages / session</div></div>
+        <div class="outro-card"><div class="val">+${fmtNum(data.insights.linesAdded)}</div><div class="lbl">lines of code added</div></div>
+        <div class="outro-card"><div class="val">${data.insights.languages.length}</div><div class="lbl">languages used</div></div>
+      </div>
+      <p class="outro-note">generated with claude code</p>
+    `;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Scrollytelling Setup
+     ═══════════════════════════════════════════════════════════ */
+  function setupScroll(updaters) {
+    document.querySelectorAll('.scroll-section').forEach(section => {
+      const key = section.id.replace('sec-', '');
+      const steps = section.querySelectorAll('.step');
+      const update = updaters[key];
+      if (!update) return;
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            steps.forEach(s => s.classList.remove('active'));
+            entry.target.classList.add('active');
+            update(parseInt(entry.target.dataset.step));
+          }
+        });
+      }, { threshold: 0.45, rootMargin: '-15% 0px -15% 0px' });
+
+      steps.forEach(step => observer.observe(step));
+    });
+  }
+
+  function observeIntros() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.section-intro').forEach(el => obs.observe(el));
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Visualizations
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ─── 1. Timeline (Area Chart) ────────────────────────── */
+  function createTimeline(data) {
+    const container = document.getElementById('viz-timeline');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 40, r: 30, b: 50, l: 55 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const defs = svg.append('defs');
+    const grad = defs.append('linearGradient').attr('id', 'area-grad')
+      .attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', 1);
+    grad.append('stop').attr('offset', '0%').attr('stop-color', '#e8855a').attr('stop-opacity', 0.4);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', '#e8855a').attr('stop-opacity', 0.02);
+
+    const clip = defs.append('clipPath').attr('id', 'tl-clip')
+      .append('rect').attr('width', 0).attr('height', H);
+
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`)
+      .attr('clip-path', 'url(#tl-clip)');
+
+    const parseDate = d => new Date(d.date + 'T12:00:00Z');
+    const x = d3.scaleTime()
+      .domain(d3.extent(data.timeline, parseDate)).range([0, w]);
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data.timeline, d => d.messages) * 1.1]).nice().range([h, 0]);
+
+    // Grid
+    g.append('g').attr('class', 'grid').attr('transform', `translate(0,${h})`)
+      .call(d3.axisBottom(x).ticks(5).tickSize(-h).tickFormat(''));
+    g.append('g').attr('class', 'grid')
+      .call(d3.axisLeft(y).ticks(5).tickSize(-w).tickFormat(''));
+
+    // Axes
+    svg.append('g').attr('class', 'axis')
+      .attr('transform', `translate(${m.l},${m.t + h})`)
+      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.utcFormat('%b %d')));
+    svg.append('g').attr('class', 'axis')
+      .attr('transform', `translate(${m.l},${m.t})`)
+      .call(d3.axisLeft(y).ticks(5));
+
+    // Area
+    const area = d3.area()
+      .x(d => x(parseDate(d))).y0(h).y1(d => y(d.messages))
+      .curve(d3.curveMonotoneX);
+    g.append('path').datum(data.timeline)
+      .attr('d', area).attr('fill', 'url(#area-grad)');
+
+    // Line
+    const line = d3.line()
+      .x(d => x(parseDate(d))).y(d => y(d.messages))
+      .curve(d3.curveMonotoneX);
+    g.append('path').datum(data.timeline)
+      .attr('d', line).attr('fill', 'none')
+      .attr('stroke', '#e8855a').attr('stroke-width', 2.5);
+
+    // Dots
+    const dots = g.selectAll('.dot').data(data.timeline).join('circle')
+      .attr('class', 'dot')
+      .attr('cx', d => x(parseDate(d))).attr('cy', d => y(d.messages))
+      .attr('r', 4).attr('fill', '#e8855a').attr('stroke', '#1a1b26').attr('stroke-width', 2)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.date}</strong><br>${d.messages} messages<br>${d.sessions} sessions`, evt))
+      .on('mouseleave', hideTip);
+
+    // Busiest annotation
+    const busiest = data.timeline.reduce((a, b) => a.messages > b.messages ? a : b);
+    const annG = g.append('g').attr('class', 'annotation').attr('opacity', 0);
+    annG.append('line').attr('class', 'annotation-line')
+      .attr('x1', x(parseDate(busiest))).attr('x2', x(parseDate(busiest)))
+      .attr('y1', y(busiest.messages) - 8).attr('y2', y(busiest.messages) - 40);
+    annG.append('text').attr('class', 'annotation-text')
+      .attr('x', x(parseDate(busiest))).attr('y', y(busiest.messages) - 46)
+      .attr('text-anchor', 'middle')
+      .text(`busiest: ${busiest.messages} msgs`);
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        clip.transition().duration(1200).ease(d3.easeCubicOut)
+          .attr('width', W);
+        annG.transition().duration(400).attr('opacity', 0);
+        dots.transition().duration(400).attr('r', 4).attr('fill', '#e8855a');
+      } else if (step === 1) {
+        clip.attr('width', W);
+        const busiestTwo = [busiest.date, data.timeline.filter(d => d.date !== busiest.date)
+          .reduce((a,b) => a.messages > b.messages ? a : b).date];
+        dots.transition().duration(600)
+          .attr('r', d => busiestTwo.includes(d.date) ? 7 : 4)
+          .attr('fill', d => busiestTwo.includes(d.date) ? '#f7768e' : '#e8855a');
+        annG.transition().delay(300).duration(500).attr('opacity', 1);
+      } else if (step === 2) {
+        dots.transition().duration(600).attr('r', 4).attr('fill', '#e8855a');
+        annG.transition().duration(400).attr('opacity', 0);
+      }
+    };
+  }
+
+  /* ─── 2. Projects (Circle Packing) ────────────────────── */
+  function createProjects(data) {
+    const container = document.getElementById('viz-projects');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const size = Math.min(W, H);
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const root = d3.hierarchy({ children: data.projects }).sum(d => d.messages);
+    d3.pack().size([size - 20, size - 20]).padding(6)(root);
+
+    const offsetX = (W - size) / 2 + 10;
+    const offsetY = (H - size) / 2 + 10;
+
+    const nodes = svg.selectAll('g.node')
+      .data(root.leaves()).join('g')
+      .attr('class', 'node')
+      .attr('transform', d => `translate(${d.x + offsetX},${d.y + offsetY})`)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.data.name}</strong><br>${d.data.messages} messages<br>${d.data.sessions} sessions`, evt))
+      .on('mouseleave', hideTip);
+
+    nodes.append('circle')
+      .attr('r', 0)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('opacity', 0.85)
+      .attr('stroke', '#1a1b26').attr('stroke-width', 2);
+
+    nodes.append('text')
+      .text(d => d.r > 30 ? d.data.name : '')
+      .attr('text-anchor', 'middle').attr('dy', '-0.2em')
+      .attr('fill', '#1a1b26').attr('font-weight', 600)
+      .attr('font-size', d => Math.min(d.r / 3.5, 14))
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0)
+      .attr('pointer-events', 'none');
+
+    nodes.append('text')
+      .text(d => d.r > 30 ? d.data.messages : '')
+      .attr('text-anchor', 'middle').attr('dy', '1.1em')
+      .attr('fill', 'rgba(40,42,54,0.7)').attr('font-weight', 400)
+      .attr('font-size', d => Math.min(d.r / 4.5, 11))
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0)
+      .attr('pointer-events', 'none');
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        nodes.select('circle')
+          .transition().duration(800).delay((_, i) => i * 100)
+          .ease(d3.easeElasticOut.amplitude(1).period(0.5))
+          .attr('r', d => d.r);
+        nodes.selectAll('text')
+          .transition().delay((_, i) => 600 + (nodes.data().indexOf(nodes.selectAll('text').data()[i]) || 0) * 100).duration(400)
+          .attr('opacity', 1);
+        nodes.select('circle').transition().delay(1200).duration(400).attr('opacity', 0.85);
+      } else if (step === 1) {
+        nodes.select('circle').transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 0.95 : 0.2);
+        nodes.selectAll('text').transition().duration(500)
+          .attr('opacity', (d, i, els) => {
+            const parent = els[i].parentNode;
+            const idx = Array.from(parent.parentNode.children).indexOf(parent);
+            return idx === 0 ? 1 : 0.2;
+          });
+      } else if (step === 2) {
+        nodes.select('circle').transition().duration(500).attr('opacity', 0.85);
+        nodes.selectAll('text').transition().duration(500).attr('opacity', 1);
+      }
+    };
+  }
+
+  /* ─── 3. Tools (Terminal Bar Chart) ─────────────────── */
+  function createTools(data) {
+    const container = document.getElementById('viz-tools');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 30, r: 30, b: 40, l: 14 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const tools = data.tools.slice(0, 8);
+    const maxCount = d3.max(tools, t => t.count);
+    const labelStartX = 115; // prompt + 12-char label
+    const charW = 10.0;
+    const maxBlocks = Math.max(10, Math.floor((w - labelStartX - 60) / charW));
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+    const rowH = Math.min(h / tools.length, 36);
+
+    const rows = g.selectAll('.term-row').data(tools).join('g')
+      .attr('class', 'term-row')
+      .attr('transform', (_, i) => `translate(0,${i * rowH})`)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => {
+        const projs = d.topProjects.map(p => `${p[0]}: ${p[1]}`).join('<br>');
+        showTip(`<strong>${d.name}</strong>: ${d.count} uses<br><br>${projs}`, evt);
+      })
+      .on('mouseleave', hideTip);
+
+    // Prompt symbol
+    rows.append('text')
+      .attr('class', 'bar-prompt')
+      .attr('x', 0).attr('y', rowH * 0.62)
+      .text('>');
+
+    // Tool name (fixed width)
+    rows.append('text')
+      .attr('class', 'bar-label')
+      .attr('x', 18).attr('y', rowH * 0.62)
+      .text(d => d.name.padEnd(12));
+
+    // Block bar (█ characters)
+    const blockTexts = rows.append('text')
+      .attr('class', 'bar-blocks')
+      .attr('x', 115).attr('y', rowH * 0.62)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('font-size', '13px')
+      .attr('opacity', 0.9)
+      .text('');
+
+    // Cursor (blinking block at end of bar)
+    const cursors = rows.append('text')
+      .attr('class', 'term-cursor')
+      .attr('x', 115).attr('y', rowH * 0.62)
+      .attr('fill', (_, i) => COLORS[i % COLORS.length])
+      .attr('font-size', '13px')
+      .attr('opacity', 0)
+      .text('█');
+
+    // Count value
+    const vals = rows.append('text')
+      .attr('class', 'bar-value')
+      .attr('y', rowH * 0.62)
+      .attr('opacity', 0)
+      .text(d => d.count);
+
+    function getBlocks(count) {
+      const n = Math.max(1, Math.round((count / maxCount) * maxBlocks));
+      return '█'.repeat(n);
+    }
+
+    function getBlockWidth(count) {
+      const n = Math.max(1, Math.round((count / maxCount) * maxBlocks));
+      return n * 10.0; // approximate char width
+    }
+
+    let lastStep = -1;
+    let typeTimers = [];
+
+    function clearTimers() {
+      typeTimers.forEach(t => clearTimeout(t));
+      typeTimers = [];
+    }
+
+    function typeBar(textEl, cursorEl, valEl, fullStr, color, delay, charDelay) {
+      const charTime = charDelay || 18;
+      cursorEl.attr('opacity', 1).attr('x', 115);
+      textEl.text('');
+      for (let c = 0; c <= fullStr.length; c++) {
+        typeTimers.push(setTimeout(() => {
+          textEl.text(fullStr.substring(0, c));
+          cursorEl.attr('x', 115 + c * 10.0);
+          if (c === fullStr.length) {
+            cursorEl.attr('opacity', 1);
+            valEl.attr('x', 115 + fullStr.length * 10.0 + 14).attr('opacity', 1);
+          }
+        }, delay + c * charTime));
+      }
+    }
+
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      clearTimers();
+      if (step === 0) {
+        rows.attr('opacity', 1);
+        tools.forEach((d, i) => {
+          const row = d3.select(rows.nodes()[i]);
+          const lineDelay = i * 180;
+          // Fade in the row
+          row.attr('opacity', 0);
+          typeTimers.push(setTimeout(() => row.attr('opacity', 1), lineDelay));
+          typeBar(
+            blockTexts.filter((_, j) => j === i),
+            cursors.filter((_, j) => j === i),
+            vals.filter((_, j) => j === i),
+            getBlocks(d.count), COLORS[i % COLORS.length],
+            lineDelay, 22
+          );
+        });
+        // Stop cursor blinking after all done
+        typeTimers.push(setTimeout(() => {
+          cursors.classed('term-cursor', false).attr('opacity', 0);
+        }, tools.length * 180 + maxBlocks * 22 + 300));
+      } else if (step === 1) {
+        cursors.attr('opacity', 0).classed('term-cursor', false);
+        rows.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 1 : 0.15);
+      } else if (step === 2) {
+        cursors.attr('opacity', 0).classed('term-cursor', false);
+        rows.transition().duration(500).attr('opacity', 1);
+      }
+    };
+  }
+
+  /* ─── 4. Rhythm (Heatmap) ─────────────────────────────── */
+  function createRhythm(data) {
+    const container = document.getElementById('viz-rhythm');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 40, r: 20, b: 20, l: 50 };
+    const w = W - m.l - m.r, h = H - m.t - m.b;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+
+    const maxCount = d3.max(data.heatmap, d => d.count);
+    const color = d3.scaleSequential()
+      .domain([0, maxCount])
+      .interpolator(t => d3.interpolateRgb('#292e42', '#e8855a')(Math.pow(t, 0.6)));
+
+    const cellW = w / 24;
+    const cellH = h / 7;
+
+    // Hour labels
+    for (let h2 = 0; h2 < 24; h2 += 3) {
+      g.append('text').attr('class', 'heatmap-label')
+        .attr('x', h2 * cellW + cellW / 2).attr('y', -10)
+        .attr('text-anchor', 'middle').text(`${h2}:00`);
+    }
+
+    // Day labels
+    DAYS.forEach((d, i) => {
+      g.append('text').attr('class', 'heatmap-label')
+        .attr('x', -10).attr('y', i * cellH + cellH / 2)
+        .attr('text-anchor', 'end').attr('dominant-baseline', 'central').text(d);
+    });
+
+    const cells = g.selectAll('.cell').data(data.heatmap).join('rect')
+      .attr('class', 'cell')
+      .attr('x', d => d.hour * cellW + 1)
+      .attr('y', d => d.day * cellH + 1)
+      .attr('width', cellW - 2).attr('height', cellH - 2)
+      .attr('rx', 3)
+      .attr('fill', '#292e42')
+      .attr('stroke', '#1a1b26').attr('stroke-width', 1)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${DAYS[d.day]} ${d.hour}:00 UTC</strong><br>${d.count} messages`, evt))
+      .on('mouseleave', hideTip);
+
+    // Determine dominant days pattern
+    const wk = data.weekly;
+    const weekendCount = wk[5].count + wk[6].count;
+    const weekendPct = Math.round(weekendCount / data.overview.totalMessages * 100);
+    const isWeekendHeavy = weekendPct > 35;
+    const isWeekdayHeavy = weekendPct < 25;
+    // Find the top 2 days for "even" pattern highlight
+    const sortedDays = wk.map((d, i) => ({ day: i, count: d.count })).sort((a, b) => b.count - a.count);
+    const topDays = new Set(sortedDays.slice(0, 2).map(d => d.day));
+
+    // Highlight overlay — position based on pattern
+    const highlightDays = isWeekendHeavy ? [5, 6] : isWeekdayHeavy ? [0, 1, 2, 3, 4] : [...topDays];
+    const hlMinDay = Math.min(...highlightDays);
+    const hlMaxDay = Math.max(...highlightDays);
+    const hlOverlay = g.append('rect')
+      .attr('x', 0).attr('y', hlMinDay * cellH)
+      .attr('width', w).attr('height', (hlMaxDay - hlMinDay + 1) * cellH)
+      .attr('fill', 'none').attr('stroke', '#f7768e')
+      .attr('stroke-width', 2).attr('rx', 4)
+      .attr('opacity', 0).attr('pointer-events', 'none');
+
+    const highlightSet = new Set(highlightDays);
+
+    let lastStep = -1;
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      if (step === 0) {
+        cells.transition().duration(600).delay((_, i) => i * 2)
+          .attr('fill', d => color(d.count));
+        hlOverlay.transition().duration(400).attr('opacity', 0);
+      } else if (step === 1) {
+        cells.transition().duration(500)
+          .attr('fill', d => color(d.count))
+          .attr('opacity', d => highlightSet.has(d.day) ? 1 : 0.2);
+        hlOverlay.transition().duration(500).attr('opacity', 1);
+      } else if (step === 2) {
+        cells.transition().duration(500)
+          .attr('fill', d => color(d.count)).attr('opacity', 1);
+        hlOverlay.transition().duration(400).attr('opacity', 0);
+      }
+    };
+  }
+
+  /* ─── 5. Goals (Terminal Bar Chart) ─────────────────── */
+  function createGoals(data) {
+    const ins = data.insights;
+    if (!ins || !ins.goals || !ins.goals.length) return () => {};
+
+    const container = document.getElementById('viz-goals');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const m = { t: 30, r: 30, b: 40, l: 14 };
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const goals = ins.goals.slice(0, 10);
+    const maxGoalCount = d3.max(goals, t => t.count);
+    const goalsW = W - m.l - m.r;
+    const fmtName = n => n.replace(/_/g, ' ');
+    const g = svg.append('g').attr('transform', `translate(${m.l},${m.t})`);
+    const rowH = Math.min((H - m.t - m.b) / goals.length, 32);
+    const charW = 10.0;
+
+    function buildTermRows(parent, items, maxVal, colors, labelWidth) {
+      const rows = parent.selectAll('.term-row').data(items).join('g')
+        .attr('class', 'term-row')
+        .attr('transform', (_, i) => `translate(0,${i * rowH})`);
+
+      rows.append('text').attr('class', 'bar-prompt')
+        .attr('x', 0).attr('y', rowH * 0.62).text('>');
+
+      rows.append('text').attr('class', 'bar-label')
+        .attr('x', 18).attr('y', rowH * 0.62)
+        .text(d => fmtName(d.name).substring(0, labelWidth).padEnd(labelWidth));
+
+      const bx = 18 + labelWidth * 7.2;
+      const maxBlocks = Math.max(10, Math.floor((goalsW - bx - 60) / charW));
+      const blockTexts = rows.append('text').attr('class', 'bar-blocks')
+        .attr('x', bx).attr('y', rowH * 0.62)
+        .attr('fill', (_, i) => colors[i % colors.length])
+        .attr('font-size', '13px').attr('opacity', 0.9).text('');
+
+      const cursors = rows.append('text').attr('class', 'term-cursor')
+        .attr('x', bx).attr('y', rowH * 0.62)
+        .attr('fill', (_, i) => colors[i % colors.length])
+        .attr('font-size', '13px').attr('opacity', 0).text('█');
+
+      const vals = rows.append('text').attr('class', 'bar-value')
+        .attr('y', rowH * 0.62).attr('opacity', 0)
+        .text(d => d.count);
+
+      return { rows, blockTexts, cursors, vals, bx,
+        getBlocks: c => '█'.repeat(Math.max(1, Math.round((c / maxVal) * maxBlocks)))
+      };
+    }
+
+    const goalsChart = buildTermRows(g, goals, maxGoalCount, COLORS, 22);
+
+    // Session types (shown in step 2)
+    const stG = svg.append('g').attr('transform', `translate(${m.l},${m.t})`).attr('opacity', 0);
+    const sessionTypes = ins.sessionTypes;
+    const stColors = ['#7dcfff','#9ece6a','#e0af68','#f7768e','#e8855a'];
+    const stChart = buildTermRows(stG, sessionTypes, d3.max(sessionTypes, s => s.count), stColors, 22);
+
+    let lastStep = -1;
+    let typeTimers = [];
+    function clearTimers() { typeTimers.forEach(t => clearTimeout(t)); typeTimers = []; }
+
+    function typeTermRows(chart, items, colors, onDone) {
+      items.forEach((d, i) => {
+        const lineDelay = i * 160;
+        const row = d3.select(chart.rows.nodes()[i]);
+        row.attr('opacity', 0);
+        typeTimers.push(setTimeout(() => row.attr('opacity', 1), lineDelay));
+        const fullStr = chart.getBlocks(d.count);
+        const bt = chart.blockTexts.filter((_, j) => j === i);
+        const cu = chart.cursors.filter((_, j) => j === i);
+        const vl = chart.vals.filter((_, j) => j === i);
+        bt.text(''); cu.attr('opacity', 1).attr('x', chart.bx); vl.attr('opacity', 0);
+        for (let c = 0; c <= fullStr.length; c++) {
+          typeTimers.push(setTimeout(() => {
+            bt.text(fullStr.substring(0, c));
+            cu.attr('x', chart.bx + c * 10.0);
+            if (c === fullStr.length) {
+              vl.attr('x', chart.bx + fullStr.length * 10.0 + 14).attr('opacity', 1);
+            }
+          }, lineDelay + c * 20));
+        }
+      });
+      const total = items.length * 160 + 20 * 20 + 300;
+      typeTimers.push(setTimeout(() => {
+        chart.cursors.classed('term-cursor', false).attr('opacity', 0);
+        if (onDone) onDone();
+      }, total));
+    }
+
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      clearTimers();
+      if (step === 0) {
+        g.attr('opacity', 1);
+        stG.transition().duration(400).attr('opacity', 0);
+        goalsChart.cursors.classed('term-cursor', true);
+        typeTermRows(goalsChart, goals, COLORS);
+      } else if (step === 1) {
+        g.attr('opacity', 1);
+        stG.transition().duration(400).attr('opacity', 0);
+        goalsChart.cursors.attr('opacity', 0).classed('term-cursor', false);
+        goalsChart.rows.transition().duration(500)
+          .attr('opacity', (_, i) => i === 0 ? 1 : 0.15);
+      } else if (step === 2) {
+        g.transition().duration(400).attr('opacity', 0);
+        stChart.cursors.classed('term-cursor', true);
+        stG.transition().delay(300).duration(400).attr('opacity', 1);
+        typeTimers.push(setTimeout(() => {
+          typeTermRows(stChart, sessionTypes, stColors);
+        }, 500));
+      }
+    };
+  }
+
+  /* ─── 6. Outcomes (Donut + Friction) ──────────────────── */
+  function createOutcomes(data) {
+    const ins = data.insights;
+    if (!ins || !ins.outcomes || !ins.outcomes.length) return () => {};
+
+    const container = document.getElementById('viz-outcomes');
+    const rect = container.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+
+    const svg = d3.select(container).append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%');
+
+    const cx = W / 2, cy = H / 2;
+    const radius = Math.min(W, H) * 0.3;
+
+    // ── Donut chart (outcomes) ──
+    const donutG = svg.append('g').attr('transform', `translate(${cx},${cy})`);
+
+    const outcomeColors = {
+      'fully_achieved': '#9ece6a',
+      'mostly_achieved': '#7dcfff',
+      'partially_achieved': '#e0af68',
+      'not_achieved': '#f7768e',
+      'unclear_from_transcript': '#565f89',
+    };
+
+    const pie = d3.pie().value(d => d.count).sort(null).padAngle(0.03);
+    const arc = d3.arc().innerRadius(radius * 0.6).outerRadius(radius);
+    const arcHover = d3.arc().innerRadius(radius * 0.6).outerRadius(radius * 1.06);
+
+    const arcs = donutG.selectAll('path').data(pie(ins.outcomes)).join('path')
+      .attr('d', arc)
+      .attr('fill', d => outcomeColors[d.data.name] || '#565f89')
+      .attr('stroke', '#1a1b26').attr('stroke-width', 2)
+      .attr('opacity', 0)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.data.name.replace(/_/g,' ')}</strong><br>${d.data.count} sessions`, evt))
+      .on('mouseleave', function(evt, d) {
+        hideTip();
+        d3.select(this).transition().duration(200).attr('d', arc);
+      })
+      .on('mouseenter', function(evt, d) {
+        d3.select(this).transition().duration(200).attr('d', arcHover);
+      });
+
+    // Center text
+    const centerText = donutG.append('text')
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+      .attr('fill', '#c0caf5').attr('font-weight', 700).attr('font-size', '2rem')
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0);
+    const centerLabel = donutG.append('text')
+      .attr('text-anchor', 'middle').attr('y', 28)
+      .attr('fill', '#565f89').attr('font-size', '0.75rem').attr('font-weight', 500)
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .attr('opacity', 0);
+
+    // Legend
+    const legendG = donutG.append('g').attr('transform', `translate(${radius + 30},${-radius + 10})`);
+    ins.outcomes.forEach((o, i) => {
+      const row = legendG.append('g').attr('transform', `translate(0,${i * 24})`);
+      row.append('rect').attr('width', 12).attr('height', 12).attr('rx', 3)
+        .attr('fill', outcomeColors[o.name] || '#565f89');
+      row.append('text').attr('x', 18).attr('y', 10)
+        .attr('fill', '#c0caf5').attr('font-size', '11px').attr('font-family', 'JetBrains Mono, monospace')
+        .text(`${o.name.replace(/_/g, ' ')} (${o.count})`);
+    });
+
+    // ── Friction bars (terminal style, shown in step 1) ──
+    const frictionG = svg.append('g')
+      .attr('transform', `translate(${W * 0.15},${H * 0.15})`).attr('opacity', 0);
+
+    const frictionData = ins.friction;
+    const fRowH = Math.min((H * 0.7) / Math.max(frictionData.length, 1), 32);
+    const maxFriction = d3.max(frictionData, f => f.count) || 1;
+    const fColors = ['#f7768e','#e0af68','#e0af68','#f7768e','#bb9af7'];
+    const fLabelW = 22;
+    const fCharW = 10.0;
+    const fAvailW = W * 0.7;
+    const fBxStart = 18 + fLabelW * 7.2;
+    const fMaxBlocks = Math.max(10, Math.floor((fAvailW - fBxStart - 60) / fCharW));
+
+    frictionG.append('text').attr('class', 'chart-title')
+      .attr('y', -15).text('friction points');
+
+    const fRows = frictionG.selectAll('.term-row').data(frictionData).join('g')
+      .attr('class', 'term-row')
+      .attr('transform', (_, i) => `translate(0,${i * fRowH + 10})`);
+
+    fRows.append('text').attr('class', 'bar-prompt')
+      .attr('x', 0).attr('y', fRowH * 0.62).text('>');
+    fRows.append('text').attr('class', 'bar-label')
+      .attr('x', 18).attr('y', fRowH * 0.62)
+      .text(d => d.name.replace(/_/g, ' ').substring(0, fLabelW).padEnd(fLabelW));
+
+    const fBx = 18 + fLabelW * 7.2;
+    const fBlockTexts = fRows.append('text').attr('class', 'bar-blocks')
+      .attr('x', fBx).attr('y', fRowH * 0.62)
+      .attr('fill', (_, i) => fColors[i % fColors.length])
+      .attr('font-size', '13px').attr('opacity', 0.9).text('');
+
+    const fCursors = fRows.append('text').attr('class', 'term-cursor')
+      .attr('x', fBx).attr('y', fRowH * 0.62)
+      .attr('fill', (_, i) => fColors[i % fColors.length])
+      .attr('font-size', '13px').attr('opacity', 0).text('█');
+
+    const fVals = fRows.append('text').attr('class', 'bar-value')
+      .attr('y', fRowH * 0.62).attr('opacity', 0)
+      .text(d => d.count);
+
+    const frictionChart = { rows: fRows, blockTexts: fBlockTexts, cursors: fCursors, vals: fVals, bx: fBx,
+      getBlocks: c => '█'.repeat(Math.max(1, Math.round((c / maxFriction) * fMaxBlocks)))
+    };
+
+    // ── Helpfulness donut (shown in step 2) ──
+    const helpG = svg.append('g').attr('transform', `translate(${cx},${cy})`).attr('opacity', 0);
+
+    const helpColors = {
+      'essential': '#9ece6a', 'very_helpful': '#7dcfff',
+      'moderately_helpful': '#e0af68', 'slightly_helpful': '#e0af68', 'unhelpful': '#f7768e',
+    };
+
+    const helpArcs = helpG.selectAll('path').data(pie(ins.helpfulness)).join('path')
+      .attr('d', arc)
+      .attr('fill', d => helpColors[d.data.name] || '#565f89')
+      .attr('stroke', '#1a1b26').attr('stroke-width', 2)
+      .style('cursor', 'pointer')
+      .on('mousemove', (evt, d) => showTip(
+        `<strong>${d.data.name.replace(/_/g,' ')}</strong><br>${d.data.count} sessions`, evt))
+      .on('mouseleave', function() { hideTip(); d3.select(this).transition().duration(200).attr('d', arc); })
+      .on('mouseenter', function() { d3.select(this).transition().duration(200).attr('d', arcHover); });
+
+    const helpCenter = helpG.append('text')
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+      .attr('fill', '#c0caf5').attr('font-weight', 700).attr('font-size', '1.2rem')
+      .attr('font-family', 'JetBrains Mono, monospace')
+      .text('helpfulness');
+    const helpLegendG = helpG.append('g').attr('transform', `translate(${radius + 30},${-radius + 10})`);
+    ins.helpfulness.forEach((h, i) => {
+      const row = helpLegendG.append('g').attr('transform', `translate(0,${i * 24})`);
+      row.append('rect').attr('width', 12).attr('height', 12).attr('rx', 3)
+        .attr('fill', helpColors[h.name] || '#565f89');
+      row.append('text').attr('x', 18).attr('y', 10)
+        .attr('fill', '#c0caf5').attr('font-size', '11px').attr('font-family', 'JetBrains Mono, monospace')
+        .text(`${h.name.replace(/_/g, ' ')} (${h.count})`);
+    });
+
+    const achieved = ins.outcomes.filter(o => o.name === 'fully_achieved' || o.name === 'mostly_achieved');
+    const achievedPct = Math.round(achieved.reduce((s,o) => s+o.count, 0) / ins.totalFacets * 100);
+
+    let lastStep = -1;
+    let fTypeTimers = [];
+    function clearFTimers() { fTypeTimers.forEach(t => clearTimeout(t)); fTypeTimers = []; }
+
+    function typeFrictionRows() {
+      frictionData.forEach((d, i) => {
+        const lineDelay = i * 160;
+        const row = d3.select(frictionChart.rows.nodes()[i]);
+        row.attr('opacity', 0);
+        fTypeTimers.push(setTimeout(() => row.attr('opacity', 1), lineDelay));
+        const fullStr = frictionChart.getBlocks(d.count);
+        const bt = frictionChart.blockTexts.filter((_, j) => j === i);
+        const cu = frictionChart.cursors.filter((_, j) => j === i);
+        const vl = frictionChart.vals.filter((_, j) => j === i);
+        bt.text(''); cu.attr('opacity', 1).attr('x', frictionChart.bx); vl.attr('opacity', 0);
+        for (let c = 0; c <= fullStr.length; c++) {
+          fTypeTimers.push(setTimeout(() => {
+            bt.text(fullStr.substring(0, c));
+            cu.attr('x', frictionChart.bx + c * 10.0);
+            if (c === fullStr.length) {
+              vl.attr('x', frictionChart.bx + fullStr.length * 10.0 + 14).attr('opacity', 1);
+            }
+          }, lineDelay + c * 20));
+        }
+      });
+      const total = frictionData.length * 160 + 20 * 20 + 300;
+      fTypeTimers.push(setTimeout(() => {
+        frictionChart.cursors.classed('term-cursor', false).attr('opacity', 0);
+      }, total));
+    }
+
+    return function update(step) {
+      if (step === lastStep) return;
+      lastStep = step;
+      clearFTimers();
+      if (step === 0) {
+        donutG.transition().duration(400).attr('opacity', 1);
+        frictionG.transition().duration(400).attr('opacity', 0);
+        helpG.transition().duration(400).attr('opacity', 0);
+        arcs.transition().duration(800).delay((_, i) => i * 120)
+          .attr('opacity', 1);
+        centerText.transition().delay(600).duration(500)
+          .attr('opacity', 1).text(`${achievedPct}%`);
+        centerLabel.transition().delay(700).duration(400)
+          .attr('opacity', 1).text('success rate');
+      } else if (step === 1) {
+        donutG.transition().duration(400).attr('opacity', 0);
+        helpG.transition().duration(400).attr('opacity', 0);
+        frictionChart.cursors.classed('term-cursor', true);
+        frictionG.transition().delay(300).duration(400).attr('opacity', 1);
+        fTypeTimers.push(setTimeout(() => typeFrictionRows(), 500));
+      } else if (step === 2) {
+        donutG.transition().duration(400).attr('opacity', 0);
+        frictionG.transition().duration(400).attr('opacity', 0);
+        frictionChart.cursors.attr('opacity', 0).classed('term-cursor', false);
+        helpG.transition().delay(300).duration(600).attr('opacity', 1);
+      }
+    };
+  }
+  </script>
+</body>
+</html>

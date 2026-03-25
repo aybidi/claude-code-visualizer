@@ -24,20 +24,33 @@ https://github.com/user-attachments/assets/4f194751-f81f-473f-aa35-3203a7c414d6
 
 ## Quick Start
 
+### Option A: pip install (recommended)
+
 ```bash
-# 1. Clone
+pip install claude-code-visualizer
+claude-viz --open
+```
+
+This generates a single self-contained HTML file (`claude-code-viz.html`) that works offline — no server needed. Just open it in your browser.
+
+```bash
+# Options
+claude-viz -o my-report.html    # Custom output path
+claude-viz --claude-dir ~/path  # Custom .claude directory
+claude-viz --open               # Auto-open in browser
+```
+
+### Option B: Clone and run
+
+```bash
 git clone git@github.com:aybidi/claude-code-visualizer.git
 cd claude-code-visualizer
-
-# 2. Generate your data (reads from ~/.claude/)
 python3 process_data.py
-
-# 3. Serve locally and open
 python3 -m http.server 8765
 # Visit http://localhost:8765
 ```
 
-That's it. No dependencies, no `npm install`, no build step.
+No dependencies, no `npm install`, no build step.
 
 ## Requirements
 
