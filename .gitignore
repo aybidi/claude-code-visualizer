@@ -24,3 +24,10 @@ Thumbs.db
 # Env
 .env
 .env.*
+
+# design-sync (staged scripts + regenerated build output + machine state)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/ds/node_modules/

@@ -1,0 +1,279 @@
+/* claude-code-visualizer stylesheet — the whole visual identity in one file.
+   Extracted verbatim from index.html's <style> block (index.html:10-272).
+
+   Tokens are inlined here rather than kept in a sibling tokens/ directory:
+   the converter's copyTokens() only copies from a tokens *package* inside
+   node_modules (lib/css.mjs), so a standalone tokens/*.css would never reach
+   styles.css's @import closure — and rendered designs receive only that
+   closure. Everything designs need must be in this file.
+
+   The font uses the same Google Fonts href index.html does (index.html:8),
+   kept as a remote @import so the families load at runtime exactly as they
+   do in the app. */
+
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap");
+
+/* ─── Tokens ──────────────────────────────────────────── */
+:root {
+  --bg: #1a1b26;
+  --bg-dark: #16161e;
+  --bg-darker: #0f0f14;
+  --bg-current: #292e42;
+  --text: #c0caf5;
+  --text-muted: #565f89;
+  --text-light: #565f89;
+  --border: #292e42;
+  --accent: #e8855a;
+  --accent-light: #f0a878;
+  --accent-glow: rgba(232,133,90,0.15);
+  --cyan: #7dcfff;
+  --green: #9ece6a;
+  --orange: #e0af68;
+  --pink: #f7768e;
+  --purple: #bb9af7;
+  --red: #f7768e;
+  --yellow: #e0af68;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  text-transform: lowercase;
+}
+.preserve-case, .preserve-case * { text-transform: none; }
+
+/* ─── Loading ─────────────────────────────────────────── */
+.loading-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg-darker);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); font-size: 1.1rem; font-weight: 300;
+  transition: opacity 0.6s, visibility 0.6s;
+}
+body.loaded .loading-screen { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* ─── Hero ────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--bg-darker) 0%, #1a1b26 50%, #1e2030 100%);
+  color: white;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem; text-align: center;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 40%, rgba(232,133,90,0.08) 0%, transparent 60%),
+              radial-gradient(circle at 70% 60%, rgba(125,207,255,0.05) 0%, transparent 50%);
+}
+.hero > * { position: relative; z-index: 1; }
+.hero-label {
+  font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: lowercase;
+  color: var(--accent); margin-bottom: 1.5rem;
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.03em; margin-bottom: 0.75rem;
+}
+.hero-subtitle {
+  font-size: 0.95rem; color: rgba(192,202,245,0.5);
+  font-weight: 300; margin-bottom: 3rem;
+}
+.hero-stats {
+  display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 2.5rem;
+}
+.stat-card { text-align: center; }
+.stat-value {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, #e8855a, #f0a878, #e0af68);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-label {
+  font-size: 0.8rem; font-weight: 500;
+  color: rgba(255,255,255,0.45); text-transform: lowercase;
+  letter-spacing: 0.12em; margin-top: 0.25rem;
+}
+.hero-meta {
+  display: flex; gap: 1.5rem; align-items: center;
+  font-size: 0.85rem; color: rgba(255,255,255,0.4);
+  margin-bottom: 4rem;
+}
+.hero-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,0.25); }
+.scroll-hint {
+  position: absolute; bottom: 2.5rem;
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: lowercase;
+  color: rgba(255,255,255,0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+
+/* ─── Section Intros ──────────────────────────────────── */
+.section-intro {
+  min-height: 40vh; padding: 6rem 2rem;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.section-intro.visible { opacity: 1; transform: translateY(0); }
+.section-num {
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--accent); letter-spacing: 0.2em;
+}
+.section-intro h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; margin: 0.5rem 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+.section-intro p { color: var(--text-muted); font-size: 0.9rem; }
+
+/* ─── Scrollytelling ──────────────────────────────────── */
+.scroll-section {
+  display: flex; position: relative;
+}
+.scroll-text {
+  flex: 0 0 36%; padding: 0 2rem 0 3rem;
+  z-index: 2;
+}
+.scroll-graphic {
+  flex: 1; position: sticky;
+  top: 0; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 3rem 2rem 1rem;
+}
+.graphic-container {
+  width: 100%; height: 80%;
+  position: relative;
+}
+.graphic-container svg { display: block; }
+
+.step {
+  min-height: 70vh;
+  display: flex; align-items: center;
+  padding: 2rem 0;
+  opacity: 0.1;
+  transition: opacity 0.6s ease;
+}
+.step:first-child { padding-top: 35vh; }
+.step:last-child { padding-bottom: 50vh; }
+.step.active { opacity: 1; }
+.step p {
+  font-size: 0.95rem; line-height: 1.85;
+  color: var(--text); max-width: 340px;
+}
+.hl {
+  color: var(--accent); font-weight: 600;
+}
+.hl-pink { color: var(--pink); font-weight: 600; }
+.hl-green { color: var(--green); font-weight: 600; }
+.hl-amber { color: var(--orange); font-weight: 600; }
+
+/* ─── Tooltip ─────────────────────────────────────────── */
+.tooltip {
+  position: fixed; z-index: 1000;
+  background: var(--bg-darker); color: var(--text);
+  border: 1px solid var(--bg-current);
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  font-size: 0.78rem; line-height: 1.5;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.12s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  max-width: 220px;
+}
+.tooltip.visible { opacity: 1; }
+
+/* ─── Outro ───────────────────────────────────────────── */
+.outro {
+  min-height: 80vh;
+  background: linear-gradient(160deg, var(--bg-darker) 0%, #1a1b26 100%);
+  color: white; padding: 6rem 2rem;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+}
+.outro h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+.outro-subtitle {
+  color: rgba(192,202,245,0.5); font-size: 0.9rem;
+  margin-bottom: 3rem; max-width: 480px;
+}
+.outro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem; max-width: 700px; width: 100%;
+  margin-bottom: 3rem;
+}
+.outro-card {
+  background: rgba(41,46,66,0.6);
+  border: 1px solid rgba(86,95,137,0.3);
+  border-radius: 12px; padding: 1.5rem;
+}
+.outro-card .val {
+  font-size: 1.6rem; font-weight: 700;
+  color: var(--cyan);
+}
+.outro-card .lbl {
+  font-size: 0.78rem; color: rgba(255,255,255,0.4);
+  text-transform: lowercase; letter-spacing: 0.1em;
+  margin-top: 0.25rem;
+}
+.outro-note {
+  font-size: 0.8rem; color: rgba(255,255,255,0.25);
+  margin-top: 2rem;
+}
+
+/* ─── Chart Styles ────────────────────────────────────── */
+.axis line, .axis path { stroke: var(--bg-current); }
+.axis text { fill: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+.grid line { stroke: var(--bg-current); stroke-opacity: 0.4; stroke-dasharray: 2,3; }
+.grid path { display: none; }
+.chart-title {
+  font-size: 13px; font-weight: 600; fill: var(--text);
+}
+.annotation-line { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3,3; }
+.annotation-text { font-size: 11px; fill: var(--cyan); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+.bar-label { font-size: 11px; fill: var(--text-muted); font-weight: 400; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+.bar-value { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+.bar-prompt { font-size: 11px; fill: var(--accent); font-weight: 700; font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+.bar-blocks { font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; letter-spacing: 1.5px; }
+.term-cursor {
+  animation: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.heatmap-label { font-size: 11px; fill: var(--text-muted); font-family: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace; }
+
+/* ─── Responsive ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .scroll-section { flex-direction: column-reverse; }
+  .scroll-text { flex: none; padding: 0 1.5rem; }
+  .scroll-graphic {
+    position: relative; height: 60vh;
+    padding: 1.5rem;
+  }
+  .step { min-height: 50vh; }
+  .step:first-child { padding-top: 2rem; }
+  .hero-stats { gap: 2rem; }
+}
