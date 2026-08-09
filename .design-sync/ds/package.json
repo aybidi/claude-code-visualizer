@@ -1,0 +1,13 @@
+{
+  "name": "claude-code-visualizer-ds",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Design-sync shim: carries the claude-code-visualizer visual identity (tokens + stylesheet) into Claude Design. Tokens-only — deliberately exports no components.",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  }
+}

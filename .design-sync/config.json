@@ -1,0 +1,8 @@
+{
+  "projectId": "f4b0e444-3bb2-4ad8-a141-72169db239fa",
+  "shape": "package",
+  "pkg": "claude-code-visualizer-ds",
+  "globalName": "CCVis",
+  "cssEntry": "css/base.css",
+  "readmeHeader": ".design-sync/conventions.md"
+}
